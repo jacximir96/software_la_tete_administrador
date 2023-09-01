@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Lista de Gastos {{date("Y")}}</title>
+    <title>Reporte de ingresos y egresos</title>
     {{-- BOOTSTRAP 4 --}}
 	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> -->
 </head>
@@ -14,53 +14,59 @@
 
         <thead>
             <tr>
-                <th colspan="4" style="text-align:center;">Lista de Gastos</th>
-            </tr>
-
-            <tr>
-                <th colspan="4" style="text-align:center;">Actualizado al {{date("d-m-Y")}}</th>
+                <th style="text-align:center;font-size:0.5rem" colspan="2"><u>Reporte de ingresos y egresos entre fechas Del {{ \Carbon\Carbon::parse($datos["fecha_inicial"])->format('d-m-Y')}} al {{ \Carbon\Carbon::parse($datos["fecha_final"])->format('d-m-Y')}}</u></br>
+                <p style="font-size:0.4rem;">Fecha de Reporte: {{date("d-m-Y")}}</p></th>
             </tr>
         </thead>
-
-        <tbody>
-
-        </tbody>
 
     </table>
 
-        <hr>
-
     <table class="table table-bordered table-sm" id="tabla_cronogramaGeneral" style="text-align:center;">
-
         <thead class="thead-light">
             <tr style="background:#B2CFB6;">
-                <th>#</th>
-                <th>Descripción</th>
-                <th>Cantidad</th>
-                <th>Precio Unitario</th>
-                <th>Precio Total</th>
-                <th>Unidad Medida</th>
-                <th>Agregado</th>
-                <th>Actualizado</th>
-                <th>Usuario que realizó la última acción</th>
+                <th colspan="3" style="vertical-align : middle;text-align:center;" scope="col">INGRESOS</th>
+            </tr>
+
+            <tr style="background:#B2CFB6;">
+                <th style="vertical-align : middle;text-align:center;">#</th>
+                <th style="vertical-align : middle;text-align:center;">Fecha</th>
+                <th style="vertical-align : middle;text-align:center;">Monto</th>
             </tr>
         </thead>
 
-        @foreach($gastos as $key => $valor_gastos)
         <tbody>
+        @foreach($ingresosPorFechas as $key =>$valor_ingresosPorFechas)
             <tr>
                 <td>{{($key+1)}}</td>
-                <td>{{$valor_gastos->descripcion_gasto}}</td>
-                <td>{{$valor_gastos->cantidad_gasto}}</td>
-                <td>{{$valor_gastos->precio_gasto}}</td>
-                <td>{{$valor_gastos->preciot_gasto}}</td>
-                <td>{{$valor_gastos->nombre_unidadMedida}}</td>
-                <td>{{ \Carbon\Carbon::parse($valor_gastos->created_at)->format('d-m-Y H:i:s')}}</td>
-                <td>{{ \Carbon\Carbon::parse($valor_gastos->updated_at)->format('d-m-Y H:i:s')}}</td>
-                <td>{{$valor_gastos->name}}</td>
+                <td>{{\Carbon\Carbon::parse($valor_ingresosPorFechas->created_at)->format('d-m-Y')}}</td>
+                <td>S/ {{$valor_ingresosPorFechas->cfac_monto_total}}</td>
             </tr>
-        </tbody>
         @endforeach
+        </tbody>
+    </table>
+
+    <table class="table table-bordered table-sm" id="tabla_cronogramaGeneral" style="text-align:center;">
+        <thead class="thead-light">
+            <tr style="background:#B2CFB6;">
+                <th colspan="3" style="vertical-align : middle;text-align:center;" scope="col">EGRESOS*</th>
+            </tr>
+
+            <tr style="background:#B2CFB6;">
+                <th style="vertical-align : middle;text-align:center;">#</th>
+                <th style="vertical-align : middle;text-align:center;">Fecha</th>
+                <th style="vertical-align : middle;text-align:center;">Monto</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        @foreach($egresosPorFechas as $key =>$valor_egresosPorFechas)
+            <tr>
+                <td>{{($key+1)}}</td>
+                <td>{{\Carbon\Carbon::parse($valor_egresosPorFechas->created_at)->format('d-m-Y')}}</td>
+                <td>S/ {{$valor_egresosPorFechas->precio_gasto}}</td>
+            </tr>
+        @endforeach
+        </tbody>
     </table>
 </body>
 

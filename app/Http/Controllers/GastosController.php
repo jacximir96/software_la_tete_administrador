@@ -25,13 +25,16 @@ class GastosController extends Controller
         $administradores = AdministradoresModel::all();
         $estado = DB::select('SELECT * FROM estado');
         $gastos =   DB::select('SELECT GA.id_gasto,GA.descripcion_gasto,GA.estado_gasto,
-                                        GA.id_usuario,GA.created_at,GA.updated_at,E.nombre_estado,U.name,GA.precio_gasto FROM
-                                        gastos GA INNER JOIN estado E ON GA.estado_gasto = E.id_estado
+                                        GA.id_usuario,GA.created_at,GA.updated_at,E.nombre_estado,U.name,GA.precio_gasto,
+                                        GA.cantidad_gasto,GA.preciot_gasto,UM.nombre_unidadMedida FROM
+                                        gastos GA INNER JOIN unidades_medida UM ON GA.id_unidadMedida = UM.id_unidadMedida
+                                        INNER JOIN estado E ON GA.estado_gasto = E.id_estado
                                         LEFT JOIN users U ON GA.id_usuario = U.id ORDER BY GA.id_gasto DESC');
+        $unidadesMedida = UnidadesMedidaModel::all();
 
         return view("paginas.gastos", array(
             "administradores" => $administradores, "estado" => $estado,
-            "gastos" => $gastos
+            "gastos" => $gastos,"unidadesMedida" => $unidadesMedida
         ));
     }
 
@@ -39,17 +42,22 @@ class GastosController extends Controller
     {
         $datos =  array(
             "descripcion_gasto" => $request->input("descripcion_gasto"),
+            "cantidad_gasto" => $request->input("cantidad_gasto"),
             "precio_gasto" => $request->input("precio_gasto"),
-            "estado_gasto" => $request->input("estado_gasto"),
-            "usuario_gasto" => $request->input("usuario_gasto")
+            "preciot_gasto" => $request->input("preciot_gasto"),
+            "estado_gasto" => 1,
+            "usuario_gasto" => $request->input("usuario_gasto"),
+            "unidadMedida_gasto"=>$request->input("unidadMedida_gasto"),
         );
 
         if (!empty($datos)) {
             $validar = \Validator::make($datos, [
                 "descripcion_gasto" => 'required|regex:/^[,\\.\\0-9a-zA-ZñÑáéíóúÁÉÍÓÚ ]+$/i',
+                "cantidad_gasto" => 'required',
                 "precio_gasto" => 'required',
-                "estado_gasto" => 'required',
-                "usuario_gasto" => 'required'
+                "preciot_gasto" => 'required',
+                "usuario_gasto" => 'required',
+                "unidadMedida_gasto" => 'required'
             ]);
 
             if ($validar->fails()) { //SI LA VALIDACIÓN FALLA - ENVIAMOS UN MENSAJE EN LA PANTALLA
@@ -57,9 +65,12 @@ class GastosController extends Controller
             } else {
                 $gasto = new GastosModel();
                 $gasto->descripcion_gasto = $datos["descripcion_gasto"];
+                $gasto->cantidad_gasto = $datos["cantidad_gasto"];
                 $gasto->precio_gasto = $datos["precio_gasto"];
+                $gasto->preciot_gasto = $datos["preciot_gasto"];
                 $gasto->estado_gasto = $datos["estado_gasto"];
                 $gasto->id_usuario = $datos["usuario_gasto"];
+                $gasto->id_unidadMedida = $datos["unidadMedida_gasto"];
                 $gasto->save();
 
                 return redirect('/gastos')->with("ok-crear", "");
@@ -88,20 +99,27 @@ class GastosController extends Controller
         $administradores = AdministradoresModel::all();
         $estado = DB::select('SELECT * FROM estado');
         $gastos =   DB::select('SELECT GA.id_gasto,GA.descripcion_gasto,GA.estado_gasto,
-                                        GA.id_usuario,GA.created_at,GA.updated_at,E.nombre_estado,U.name,GA.precio_gasto FROM
-                                        gastos GA INNER JOIN estado E ON GA.estado_gasto = E.id_estado
-                                        LEFT JOIN users U ON GA.id_usuario = U.id ORDER BY GA.id_gasto DESC');
+                                GA.id_usuario,GA.created_at,GA.updated_at,E.nombre_estado,U.name,GA.precio_gasto,
+                                GA.cantidad_gasto,GA.preciot_gasto,UM.nombre_unidadMedida FROM
+                                gastos GA INNER JOIN unidades_medida UM ON GA.id_unidadMedida = UM.id_unidadMedida
+                                INNER JOIN estado E ON GA.estado_gasto = E.id_estado
+                                LEFT JOIN users U ON GA.id_usuario = U.id ORDER BY GA.id_gasto DESC');
+        $unidadesMedida = UnidadesMedidaModel::all();
+        $gasto_unidadMedida = DB::select('SELECT * FROM gastos GA INNER JOIN unidades_medida UM ON GA.id_unidadMedida = UM.id_unidadMedida
+                                         WHERE GA.id_gasto = ?',[$id]);
         $gasto_estado = DB::select('SELECT * FROM gastos GA INNER JOIN estado E ON GA.estado_gasto = E.id_estado WHERE id_gasto = ?', [$id]);
 
         if (count($gasto) != 0) {
             return view("paginas.gastos", array(
                 "status" => 200, "gasto" => $gasto, "administradores" => $administradores,
-                "estado" => $estado, "gastos" => $gastos, "gasto_estado" => $gasto_estado
+                "estado" => $estado, "gastos" => $gastos, "gasto_estado" => $gasto_estado,
+                "unidadesMedida" => $unidadesMedida, "gasto_unidadMedida" => $gasto_unidadMedida
             ));
         } else {
             return view("paginas.gastos", array(
                 "status" => 404, "gasto" => $gasto, "administradores" => $administradores,
-                "estado" => $estado, "gastos" => $gastos, "gasto_estado" => $gasto_estado
+                "estado" => $estado, "gastos" => $gastos, "gasto_estado" => $gasto_estado,
+                "unidadesMedida" => $unidadesMedida, "gasto_unidadMedida" => $gasto_unidadMedida
             ));
         }
     }
@@ -110,17 +128,21 @@ class GastosController extends Controller
     {
         $datos =  array(
             "descripcion_gasto" => $request->input("descripcion_gasto"),
+            "cantidad_gasto" => $request->input("cantidad_gasto"),
             "precio_gasto" => $request->input("precio_gasto"),
-            "estado_gasto" => $request->input("estado_gasto"),
-            "usuario_gasto" => $request->input("usuario_gasto")
+            "preciot_gasto" => $request->input("preciot_gasto"),
+            "usuario_gasto" => $request->input("usuario_gasto"),
+            "unidadMedida_gasto"=>$request->input("unidadMedida_gasto"),
         );
 
         if (!empty($datos)) {
             $validar = \Validator::make($datos, [
                 "descripcion_gasto" => 'required|regex:/^[,\\.\\0-9a-zA-ZñÑáéíóúÁÉÍÓÚ ]+$/i',
+                "cantidad_gasto" => 'required',
                 "precio_gasto" => 'required',
-                "estado_gasto" => 'required',
-                "usuario_gasto" => 'required'
+                "preciot_gasto" => 'required',
+                "usuario_gasto" => 'required',
+                "unidadMedida_gasto" => 'required'
             ]);
 
             if ($validar->fails()) {
@@ -128,9 +150,12 @@ class GastosController extends Controller
             } else {
                 $datos =  array(
                     "descripcion_gasto" => $request->input("descripcion_gasto"),
+                    "cantidad_gasto" => $request->input("cantidad_gasto"),
                     "precio_gasto" => $request->input("precio_gasto"),
-                    "estado_gasto" => $request->input("estado_gasto"),
-                    "id_usuario" => $request->input("usuario_gasto")
+                    "preciot_gasto" => $request->input("preciot_gasto"),
+                    "estado_gasto" => 1,
+                    "id_usuario" => $request->input("usuario_gasto"),
+                    "id_unidadMedida" => $request->input("unidadMedida_gasto")
                 );
 
                 $gasto = GastosModel::where('id_gasto', $id)->update($datos);
@@ -145,10 +170,12 @@ class GastosController extends Controller
     {
 
         $gastos =   DB::select('SELECT GA.id_gasto,GA.descripcion_gasto,GA.estado_gasto,
-                                        GA.id_usuario,GA.created_at,GA.updated_at,E.nombre_estado,U.name,GA.precio_gasto FROM
-                                        gastos GA INNER JOIN estado E ON GA.estado_gasto = E.id_estado
-                                        LEFT JOIN users U ON GA.id_usuario = U.id 
-                                        WHERE GA.control_gasto = 0 ORDER BY GA.id_gasto DESC');
+                                GA.id_usuario,GA.created_at,GA.updated_at,E.nombre_estado,U.name,GA.precio_gasto,
+                                GA.cantidad_gasto,GA.preciot_gasto,UM.nombre_unidadMedida FROM
+                                gastos GA INNER JOIN unidades_medida UM ON GA.id_unidadMedida = UM.id_unidadMedida
+                                INNER JOIN estado E ON GA.estado_gasto = E.id_estado
+                                LEFT JOIN users U ON GA.id_usuario = U.id 
+                                WHERE GA.control_gasto = 0 ORDER BY GA.id_gasto DESC');
 
         // compartir datos para ver
         view()->share('gastos', $gastos);

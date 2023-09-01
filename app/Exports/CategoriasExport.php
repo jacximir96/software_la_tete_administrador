@@ -15,7 +15,7 @@ class CategoriasExport implements FromCollection
     {
         $categorias =   DB::select('SELECT C.nombre_categoria,C.codigo_categoria,C.descripcion_categoria,
                                     C.created_at,C.updated_at,U.name
-                                    FROM software_sg.categorias C LEFT JOIN software_sg.users U ON U.id = C.id_usuario
+                                    FROM categorias C LEFT JOIN users U ON U.id = C.id_usuario
                                     ORDER BY id_categoria DESC');
 
         return collect($categorias);

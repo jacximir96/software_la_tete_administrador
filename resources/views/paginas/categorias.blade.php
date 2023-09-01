@@ -33,7 +33,7 @@
             <div class="card">
               <div class="card-header">
                 @can('crear_categorias')
-                <button class="btn btn-success btn-sm boton-general" data-toggle="modal" data-target="#crearCategoria" style="display:none;">
+                <button class="btn btn-success btn-sm boton-general" data-toggle="modal" data-target="#crearCategoria">
                     <i class="fas fa-plus-circle"></i> Agregar nueva Categoría
                 </button>
                 @endcan

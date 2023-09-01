@@ -684,6 +684,78 @@ $('#diagnostico_pacientesCitados').attr('readonly','readonly');
 
 /* FIN DE FUA - PROGRAMACIÓN DE PACIENTES */
 
+$('select[name=seleccionar_producto]').change(function(){
+	let valor = $('#seleccionar_stock1').val($("select[name=seleccionar_producto] option:selected").attr("data-stock"));
+})
+
+$('select[id=seleccionar_producto]').change(function(){
+	let valor1 = $('#seleccionar_stock').val($("select[id=seleccionar_producto] option:selected").attr("data-stock"));
+})
+
+$("#guardar_kardexLimpieza").click(function(){
+	if($("#formulario_crearEntradaProducto").valid() == false) {
+		return;
+	}
+
+	let seleccionar_producto = $("#seleccionar_producto1").val();
+	let seleccionar_motivo = $("#seleccionar_motivo1").val();
+	let seleccionar_cantidad = $("#seleccionar_cantidad1").val();
+	let pdf_TdrContratoLimpieza = $("#pdf_TdrContratoLimpieza").val();
+	let seleccionar_stock = $("#seleccionar_stock1").val();
+})
+
+$("#guardar_kardexLimpiezaSalida").click(function(){
+	if($("#formulario_crearSalidaProducto").valid() == false) {
+		return;
+	}
+
+	let seleccionar_producto = $("#seleccionar_producto").val();
+	let seleccionar_motivo = $("#seleccionar_motivo").val();
+	let seleccionar_cantidad = $("#seleccionar_cantidad").val();
+	let seleccionar_stock = $("#seleccionar_stock").val();
+	let seleccionar_empleado = $("#seleccionar_empleado").val();
+})
+
+$("#cantidad_gasto_store").bind("keyup keydown change", function() {
+	let calculoTotalStore1 = $("#cantidad_gasto_store").val() * $("#precio_gasto_store").val();
+
+	if ($("#cantidad_gasto_store").val() != '' || $("#precio_gasto_store").val() != '') {
+		$("#preciot_gasto_store").val(calculoTotalStore1);
+	} else {
+		$("#preciot_gasto_store").val("");
+	}
+});
+
+$("#precio_gasto_store").bind("keyup keydown change", function() {
+	let calculoTotalStore2 = $("#cantidad_gasto_store").val() * $("#precio_gasto_store").val();
+
+	if ($("#cantidad_gasto_store").val() != '' || $("#precio_gasto_store").val() != '') {
+		$("#preciot_gasto_store").val(calculoTotalStore2);
+	} else {
+		$("#preciot_gasto_store").val("");
+	}
+});
+
+$("#cantidad_gasto_update").bind("keyup keydown change", function() {
+	let calculoTotalUpdate1 = $("#cantidad_gasto_update").val() * $("#precio_gasto_update").val();
+
+	if ($("#cantidad_gasto_update").val() != '' || $("#precio_gasto_update").val() != '') {
+		$("#preciot_gasto_update").val(calculoTotalUpdate1);
+	} else {
+		$("#preciot_gasto_update").val("");
+	}
+});
+
+$("#precio_gasto_update").bind("keyup keydown change", function() {
+	let calculoTotalUpdate2 = $("#cantidad_gasto_update").val() * $("#precio_gasto_update").val();
+
+	if ($("#cantidad_gasto_update").val() != '' || $("#precio_gasto_update").val() != '') {
+		$("#preciot_gasto_update").val(calculoTotalUpdate2);
+	} else {
+		$("#preciot_gasto_update").val("");
+	}
+});
+
 
 
 

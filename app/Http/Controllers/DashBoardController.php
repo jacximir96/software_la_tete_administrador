@@ -14,6 +14,9 @@ class DashBoardController extends Controller
     public function index(){
         $administradores = AdministradoresModel::all();
         $cantidad_usuarios = DB::select('SELECT COUNT(id) as cantidad_usuarios FROM users');
+        $cantidad_categorias = DB::select('SELECT COUNT(id_categoria) as cantidad_categorias FROM categorias');
+        $cantidad_unidadesMedida = DB::select('SELECT COUNT(id_unidadMedida) as cantidad_unidadesMedida FROM unidades_medida');
+        $cantidad_productosLimpieza = DB::select('SELECT COUNT(id_productoLimpieza) as cantidad_productosLimpieza FROM productos_limpieza');
 /*         $cantidad_pacientesCitados = DB::SELECT("SELECT COUNT(CH.cita_fech) as fecha
         FROM    [INRDIS_II].[dbo].[CitasHora] CH INNER JOIN 
                 [INRDIS_II].[dbo].[CitasHora_Paciente] CHP ON CH.cita_prof = CHP.cita_prof AND CH.cita_fech = CHP.cita_fech AND CH.cita_extra = CHP.cita_extra AND
@@ -238,7 +241,10 @@ class DashBoardController extends Controller
                                           AND YEAR(FU.FechaHoraRegistro) = YEAR(GETDATE()) AND MONTH(FU.FechaHoraRegistro) = MONTH(GETDATE())-1"); */
 
         return view("paginas.dashboard",  array("administradores"=>$administradores,
-                                                "cantidad_usuarios"=>$cantidad_usuarios/* ,
+                                                "cantidad_usuarios"=>$cantidad_usuarios,
+                                                "cantidad_categorias"=>$cantidad_categorias,
+                                                "cantidad_unidadesMedida"=>$cantidad_unidadesMedida,
+                                                "cantidad_productosLimpieza"=>$cantidad_productosLimpieza/* ,
                                                 "sum"=>$sum,"sum_fuasEmitidos"=>$sum_fuasEmitidos,
                                                 "sum_fuasObservados"=>$sum_fuasObservados,
                                                 "sum_fuasEmitidosG"=>$sum_fuasEmitidosG,

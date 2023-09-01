@@ -63,6 +63,13 @@ Route::group(['middleware' => ['permission:ver_categorias|editar_categorias|elim
     Route::get('/reportesCategorias/categoriasEXCEL','CategoriasController@createEXCEL');
 });
 
+Route::group(['middleware' => ['permission:ver_productosLimpieza|editar_productosLimpieza|crear_productosLimpieza|eliminar_productosLimpieza|reportesEXCEL_productosLimpieza|reportesActivosPDF_productosLimpieza|reportesAgotadosPDF_productosLimpieza']], function () {
+    Route::resource('/productosLimpieza','ProductosLimpiezaController');
+    Route::get('/reportesProductosLimpieza/productosLimpiezaPDF','ProductosLimpiezaController@createPDF');
+    Route::get('/reportesProductosLimpiezaAgotados/productosLimpiezaAgotadosPDF','ProductosLimpiezaController@createAgotadoPDF');
+    Route::get('/reportesProductosLimpieza/productosLimpiezaEXCEL','ProductosLimpiezaController@createEXCEL');
+});
+
 Route::get('/soporteTecnico','SoporteTecnicoController@index');
 Route::get('/','DashboardController@index');
 Route::get('/dashboard','DashBoardController@index');
@@ -162,6 +169,20 @@ Route::post('/fuasDigitados/anularDigitacion','FuasDigitadosController@anularDig
 Route::post('/fuasEmitidosG/volverDeAnuladoAGenerado','FuasEmitidosGController@volverDeAnuladoAGenerado')->name('consultar.volverDeAnuladoAGenerado');
 Route::get('/dashboard/datosActual/listarActual','DashboardController@listarActual');
 
+
+Route::get('/reportesEntreFechas','ReportesEntreFechasController@index');
+Route::get('/reportesEntreFechas/entreFechasPDF','ReportesEntreFechasController@createPdfIngresosEgresos');
+Route::get('/reportesEntreFechas1/entreFechasPDF','ReportesEntreFechasController@createPdfCierreCaja');
+Route::get('/reportesEntreFechas2/entreFechasPDF','ReportesEntreFechasController@createPDF2');
+
+Route::resource('/kardexLimpieza','KardexLimpiezaController');
+Route::get('/kardexLimpieza','KardexLimpiezaController@index');
+Route::post('/kardexLimpieza/entradaProductos','KardexLimpiezaController@entradas_kardex');
+Route::post('/kardexLimpieza/salidaProductos','KardexLimpiezaController@salidas_kardex');
+Route::post('/kardexLimpieza/buscarPorMes','KardexLimpiezaController@buscar_mes');
+Route::get('/reportesKardexLimpieza/movimientosLimpiezaPDF','KardexLimpiezaController@createMovimientosPDF');
+Route::get('/reportesEntradasLimpieza/entradasLimpiezaPDF','KardexLimpiezaController@createEntradasPDF');
+Route::get('/reportesSalidasLimpieza/salidasLimpiezaPDF','KardexLimpiezaController@createSalidasPDF');
 
 
 

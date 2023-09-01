@@ -221,7 +221,7 @@ class UnidadesMedidaController extends Controller
 
         $notasVentaSumaTotal = DB::select('SELECT ROUND(SUM(cf.cfac_monto_total),2) as cfac_monto_total_suma 
         FROM cabecera_factura cf WHERE cf.IDStatus = 4 AND cfac_status_control = 0');
-        $montoTotalGastos = DB::SELECT('SELECT ROUND(SUM(ga.precio_gasto),2) as ga_monto_total 
+        $montoTotalGastos = DB::SELECT('SELECT ROUND(SUM(ga.preciot_gasto),2) as ga_monto_total 
         FROM gastos ga WHERE ga.control_gasto = 0');
         $montoUltimoCuadreCaja = DB::SELECT('SELECT ROUND(cc_monto,2) as cc_monto_ultimo FROM caja_cuadre 
         ORDER BY IDCajaCuadre DESC LIMIT 1');

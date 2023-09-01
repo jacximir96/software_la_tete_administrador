@@ -38,11 +38,11 @@
                 </button>
                 @endcan
 
-<!--                 @can('reportesEXCEL_gastos')
+                @can('reportesEXCEL_gastos')
                 <a href="{{ url('/') }}/reportesGastos/gastosEXCEL" target="_blank" class="btn btn-warning btn-sm boton-general" style="float:right; margin-left: 5px;">
                     Exportar a EXCEL
                 </a>
-                @endcan -->
+                @endcan
 
                 @can('reportesPDF_gastos')
                 <a href="{{ url('/') }}/reportesGastos/gastosPDF" target="_blank" class="btn btn-danger btn-sm boton-general" style="float:right;">
@@ -58,8 +58,10 @@
                         <tr>
                             <th>#</th>
                             <th>Descripción</th>
-                            <th>Precio</th>
-                            <th>Estado</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Precio Total</th>
+                            <th>Unidad Medida</th>
                             <th>Agregado</th>
                             <th>Actualizado</th>
                             <th>Acciones</th>
@@ -73,8 +75,10 @@
                         <tr>
                             <td style="text-align: center;">{{($key+1)}}</td>
                             <td style="text-align: center; text-transform: uppercase;">{{$valor_gastos->descripcion_gasto}}</td>
+                            <td style="text-align: center; text-transform: uppercase;">{{$valor_gastos->cantidad_gasto}}</td>
                             <td style="text-align: center; text-transform: uppercase;">{{$valor_gastos->precio_gasto}}</td>
-                            <td style="text-align: center; text-transform: uppercase;">{{$valor_gastos->nombre_estado}}</td>
+                            <td style="text-align: center; text-transform: uppercase;">{{$valor_gastos->preciot_gasto}}</td>
+                            <td style="text-align: center; text-transform: uppercase;">{{$valor_gastos->nombre_unidadMedida}}</td>
                             <td style="text-align: center; text-transform: uppercase;">{{ \Carbon\Carbon::parse($valor_gastos->created_at)->format('d-m-Y H:i:s')}}</td>
                             <td style="text-align: center; text-transform: uppercase;">{{ \Carbon\Carbon::parse($valor_gastos->updated_at)->format('d-m-Y H:i:s')}}</td>
                             <td style="text-align: center;">
@@ -153,16 +157,55 @@
                     </div>
 
                     <div class="input-group mb-3">
-                        <label for="email" class="col-md-3 control-label">Precio:</label>
+                        <label for="email" class="col-md-3 control-label">Cantidad:</label>
 
                         <div class="col-md-9">
-                            <input type="text" class="form-control" name="precio_gasto"
+                            <input type="text" class="form-control" name="cantidad_gasto" id="cantidad_gasto_store"
+                            value="{{ old("cantidad_gasto") }}" required autofocus
+                            placeholder="Ingresar cantidad" style="text-transform: uppercase;">
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <label for="email" class="col-md-3 control-label">Precio unitario:</label>
+
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" name="precio_gasto" id="precio_gasto_store"
                             value="{{ old("precio_gasto") }}" required autofocus
                             placeholder="Ingresar precio" style="text-transform: uppercase;">
                         </div>
                     </div>
 
                     <div class="input-group mb-3">
+                        <label for="email" class="col-md-3 control-label">Precio total:</label>
+
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" name="preciot_gasto" id="preciot_gasto_store"
+                            value="{{ old("preciot_gasto") }}" required autofocus
+                            style="text-transform: uppercase;" readonly="true">
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <label for="email" class="col-md-3 control-label">U. de Medida:</label>
+
+                        <div class="col-md-9">
+                            <select class="form-control select2" name="unidadMedida_gasto" required>
+
+                            <option value="">
+                                    -- Seleccionar la unidad de Medida --
+                            </option>
+
+                            @foreach ($unidadesMedida as $key => $value)
+                                <option value="{{old('id_unidadMedida',$value->id_unidadMedida)}}">
+                                    {{old('nombre_unidadMedida',$value->nombre_unidadMedida)}}
+                                </option>
+                            @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+<!--                     <div class="input-group mb-3">
                         <label for="email" class="col-md-3 control-label">Estado:</label>
 
                         <div class="col-md-9">
@@ -179,7 +222,7 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
+                    </div> -->
 
                 </div>
 
@@ -248,34 +291,56 @@
                         </div>
                     </div><!-- FIN NOMBRE DE GASTO -->
 
-                    <!-- INICIO NOMBRE DE GASTO -->
+                    <!-- INICIO CANTIDAD DE GASTO -->
                     <div class="input-group mb-3">
-                        <label for="email" class="col-md-3 control-label">Precio:</label>
+                        <label for="email" class="col-md-3 control-label">Cantidad:</label>
 
                         <div class="col-md-9">
-                            <input type="text" class="form-control" name="precio_gasto"
+                            <input type="text" class="form-control" name="cantidad_gasto" id="cantidad_gasto_update"
+                            value="{{$valor_gasto["cantidad_gasto"]}}" required autofocus
+                            style="text-transform: uppercase;">
+                        </div>
+                    </div><!-- FIN CANTIDAD DE GASTO -->
+
+                    <!-- INICIO NOMBRE DE GASTO -->
+                    <div class="input-group mb-3">
+                        <label for="email" class="col-md-3 control-label">Precio unitario:</label>
+
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" name="precio_gasto" id="precio_gasto_update"
                             value="{{$valor_gasto["precio_gasto"]}}" required autofocus
                             style="text-transform: uppercase;">
                         </div>
                     </div><!-- FIN NOMBRE DE GASTO -->
 
-                    <!-- INICIO CATEGORIA DE PRODUCTO DE LIMPIEZA -->
+                    <!-- INICIO NOMBRE DE GASTO -->
                     <div class="input-group mb-3">
-                        <label for="email" class="col-md-3 control-label">Estado:</label>
+                        <label for="email" class="col-md-3 control-label">Precio total:</label>
 
                         <div class="col-md-9">
-                            <select class="form-control" name="estado_gasto" required>
-                            @foreach ($gasto_estado as $key => $value1)
+                            <input type="text" class="form-control" name="preciot_gasto" id="preciot_gasto_update"
+                            value="{{$valor_gasto["preciot_gasto"]}}" required autofocus
+                            style="text-transform: uppercase;" readonly="true">
+                        </div>
+                    </div><!-- FIN NOMBRE DE GASTO -->
 
-                                    <option value="{{$value1->estado_gasto}}">
-                                        {{$value1->nombre_estado}}
+                    <!-- INICIO UNIDADES DE MEDIDA DE GASTOS -->
+                    <div class="input-group mb-3">
+                        <label for="email" class="col-md-3 control-label">U. de medida:</label>
+
+                        <div class="col-md-9">
+                            <select class="form-control select2" name="unidadMedida_gasto" required>
+                            @foreach ($gasto_unidadMedida as $key => $value1)
+
+                                    <option value="{{$value1->id_unidadMedida}}">
+                                        {{$value1->nombre_unidadMedida}}
                                     </option>
 
-                                    @foreach ($estado as $key => $value2)
+                                    @foreach ($unidadesMedida as $key => $value2)
 
-                                        @if ($value2->id_estado != $value1->estado_gasto)
-                                            <option value="{{$value2->id_estado}}">
-                                                {{$value2->nombre_estado}}
+                                        @if ($value2->id_unidadMedida != $value1->id_unidadMedida)
+                                            <option value="{{old('id_unidadMedida',$value2->id_unidadMedida)}}">
+                                                {{old('nombre_unidadMedida',$value2->nombre_unidadMedida)}}
                                             </option>
                                         @endif{{-- Aparece todo menos el que es diferente --}}
 
@@ -284,7 +349,7 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div><!-- FIN CATEGORIA DE PRODUCTO DE LIMPIEZA -->
+                    </div><!-- FIN UNIDADES DE MEDIDA DE GASTOS -->
 
                 </div>
 

@@ -62,7 +62,7 @@
               </div>
               <div class="card-body">
 
-                <table class="table table-bordered table-striped dt-responsive" id="tablaRoles" width="100%">
+                <table class="table table-bordered table-striped dt-responsive" id="tablaCategorias" width="100%">
                     <thead>
                         <tr>
                             <th>#</th>

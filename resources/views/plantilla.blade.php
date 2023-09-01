@@ -35,10 +35,8 @@
 
     <!-- DataTables -->
     <link rel="stylesheet" href="{{ url('/') }}/css/plugins/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" href="{{ url('/') }}/css/plugins/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="{{ url('/') }}/css/plugins/scroller.dataTables.min.css">
-<!-- 	<link rel="stylesheet" href="{{ url('/') }}/css/plugins/dataTables.bootstrap4.min.css">-->
-	<!-- <link rel="stylesheet" href="{{ url('/') }}/css/plugins/responsive.bootstrap.min.css">  -->
+	<link rel="stylesheet" href="{{ url('/') }}/css/plugins/responsive.bootstrap.min.css"> 
     <link rel="stylesheet" href="{{ url('/') }}/css/plugins/select.dataTables.min.css">
     <link rel="stylesheet" href="{{ url('/') }}/css/plugins/buttons.dataTables.min.css"> 
 
@@ -75,7 +73,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script> -->
 
 	<!-- Popper JS -->
-	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script> -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 
 	<!-- Latest compiled JavaScript -->
 	<script src="{{ url('/') }}/js/plugins/bootstrap.min.js"></script>

@@ -45,6 +45,72 @@
                     </div>
                 </div>
                 @endcan
+
+                @canany(['ver_categorias','crear_categorias','editar_categorias','eliminar_categorias','reportesPDF_categorias','reportesEXCEL_categorias'])
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>
+                                @foreach($cantidad_categorias as $key => $value_categorias)
+                                    {{$value_categorias->cantidad_categorias}}
+                                @endforeach
+                            </h3>
+
+                            <p style="margin-bottom: -0.5rem;">Categorías</p>
+                        </div>
+
+                        <div class="icon">
+                            <i class="ion ion-person-add"></i>
+                        </div>
+
+                        <a href="{{url("/")}}/categorias" class="small-box-footer">Más Información <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                @endcan
+
+                @canany(['ver_unidadesMedida','crear_unidadesMedida','editar_unidadesMedida','eliminar_unidadesMedida','reportesPDF_unidadesMedida','reportesEXCEL_unidadesMedida'])
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>
+                                @foreach($cantidad_unidadesMedida as $key => $value_unidadesMedida)
+                                    {{$value_unidadesMedida->cantidad_unidadesMedida}}
+                                @endforeach
+                            </h3>
+
+                            <p style="margin-bottom: -0.5rem;">Unidades de Medida</p>
+                        </div>
+
+                        <div class="icon">
+                            <i class="ion ion-person-add"></i>
+                        </div>
+
+                        <a href="{{url("/")}}/unidadesMedida" class="small-box-footer">Más Información <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                @endcan
+
+                @canany(['ver_productosLimpieza','crear_productosLimpieza','editar_productosLimpieza','eliminar_productosLimpieza','reportesPDF_productosLimpieza','reportesEXCEL_productosLimpieza'])
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-secondary">
+                        <div class="inner">
+                            <h3>
+                                @foreach($cantidad_productosLimpieza as $key => $value_productosLimpieza)
+                                    {{$value_productosLimpieza->cantidad_productosLimpieza}}
+                                @endforeach
+                            </h3>
+
+                            <p style="margin-bottom: -0.5rem;">Productos</p>
+                        </div>
+
+                        <div class="icon">
+                            <i class="ion ion-person-add"></i>
+                        </div>
+
+                        <a href="{{url("/")}}/productosLimpieza" class="small-box-footer">Más Información <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                @endcan
             </div>
         </div>
     </section>

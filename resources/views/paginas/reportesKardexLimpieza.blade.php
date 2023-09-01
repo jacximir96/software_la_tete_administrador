@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Lista de Gastos {{date("Y")}}</title>
+    <title>Movimientos del Entradas y Salidas general - {{date("Y")}}</title>
     {{-- BOOTSTRAP 4 --}}
 	<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> -->
 </head>
@@ -14,7 +14,34 @@
 
         <thead>
             <tr>
-                <th colspan="4" style="text-align:center;">Lista de Gastos</th>
+                <th colspan="4" style="text-align:center;">Lista de Movimientos del Kardex de Productos de Limpieza del Mes de
+                @if($mfecha == 1)
+                        ENERO
+                    @elseif($mfecha == 2)
+                        FEBRERO
+                    @elseif($mfecha == 3)
+                        MARZO
+                    @elseif($mfecha == 4)
+                        ABRIL
+                    @elseif($mfecha == 5)
+                        MAYO
+                    @elseif($mfecha == 6)
+                        JUNIO
+                    @elseif($mfecha == 7)
+                        JULIO
+                    @elseif($mfecha == 8)
+                        AGOSTO
+                    @elseif($mfecha == 9)
+                        SETIEMBRE
+                    @elseif($mfecha == 10)
+                        OCTUBRE
+                    @elseif($mfecha == 11)
+                        NOVIEMBRE
+                    @elseif($mfecha == 12)
+                        DICIEMBRE
+                    @endif
+                    del {{$afecha}}
+                </th>
             </tr>
 
             <tr>
@@ -35,32 +62,36 @@
         <thead class="thead-light">
             <tr style="background:#B2CFB6;">
                 <th>#</th>
+                <th>Nombre</th>
                 <th>Descripción</th>
-                <th>Cantidad</th>
-                <th>Precio Unitario</th>
-                <th>Precio Total</th>
-                <th>Unidad Medida</th>
-                <th>Agregado</th>
-                <th>Actualizado</th>
-                <th>Usuario que realizó la última acción</th>
+                <th>Código</th>
+                <th>Stock Actual</th>
+                <th>Entradas</th>
+                <th>Salidas</th>
             </tr>
         </thead>
 
-        @foreach($gastos as $key => $valor_gastos)
         <tbody>
+            @foreach($kardexLimpiezaTotal as $key => $valor_kardexLimpiezaTotal)
             <tr>
-                <td>{{($key+1)}}</td>
-                <td>{{$valor_gastos->descripcion_gasto}}</td>
-                <td>{{$valor_gastos->cantidad_gasto}}</td>
-                <td>{{$valor_gastos->precio_gasto}}</td>
-                <td>{{$valor_gastos->preciot_gasto}}</td>
-                <td>{{$valor_gastos->nombre_unidadMedida}}</td>
-                <td>{{ \Carbon\Carbon::parse($valor_gastos->created_at)->format('d-m-Y H:i:s')}}</td>
-                <td>{{ \Carbon\Carbon::parse($valor_gastos->updated_at)->format('d-m-Y H:i:s')}}</td>
-                <td>{{$valor_gastos->name}}</td>
+                <td>{{$key+1}}</td>
+                <td>{{$valor_kardexLimpiezaTotal->nombre_productoLimpieza}}</td>
+                <td>{{$valor_kardexLimpiezaTotal->descripcion_productoLimpieza}}</td>
+                <td>{{$valor_kardexLimpiezaTotal->codigo_productoLimpieza}}</td>
+                <td>{{$valor_kardexLimpiezaTotal->stock_productoLimpieza}}</td>
+                <td>{{$valor_kardexLimpiezaTotal->suma_entradas}}</td>
+                <td>{{$valor_kardexLimpiezaTotal->suma_salidas}}</td>
             </tr>
+            @endforeach
+
+            @foreach($sumaEntradasSalidasTotal as $key => $valor_sumaEntradasSalidasTotal)    
+            <tr>
+                <td colspan="5">Total</td>
+                <td>{{$valor_sumaEntradasSalidasTotal->suma_entradasTotal}}</td>
+                <td>{{$valor_sumaEntradasSalidasTotal->suma_salidasTotal}}</td>
+            </tr>
+            @endforeach
         </tbody>
-        @endforeach
     </table>
 </body>
 

@@ -222,6 +222,66 @@
                                 @endcan
 
                                 <!--=====================================
+                                Botón de Productos
+                                ======================================-->
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link">
+                                    <i class="nav-icon fas fa-eraser"></i>
+                                    <p>
+                                        Gestión de Productos
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                    </a>
+
+                                    <ul class="nav nav-treeview">
+
+                                        <li class="nav-item has-treeview">
+                                            <a href="#" class="nav-link">
+                                            <i class="nav-icon fas fa-chart-pie"></i>
+                                            <p>
+                                                Almacén
+                                                <i class="right fas fa-angle-left"></i>
+                                            </p>
+                                            </a>
+
+                                            <ul class="nav nav-treeview">
+                                                @canany(['ver_productosLimpieza','crear_productosLimpieza','editar_productosLimpieza','eliminar_productosLimpieza','reportesEXCEL_productosLimpieza','reportesActivosPDF_productosLimpieza','reportesAgotadosPDF_productosLimpieza'])
+                                                <li class="nav-item">
+                                                    <a href="{{ url("/productosLimpieza") }}" class="nav-link">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    <p>Productos</p>
+                                                    </a>
+                                                </li>
+                                                @endcan
+                                            </ul>
+                                        </li>
+
+                                    
+                                    <!-- <li class="nav-item">
+                                        <a href="{{ url("/recepcionLimpieza") }}" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Recepción de Materiales</p>
+                                        </a>
+                                    </li> -->
+
+                                    <!-- <li class="nav-item">
+                                        <a href="{{ url("/formatoLimpieza") }}" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Formato</p>
+                                        </a>
+                                    </li> -->
+
+                                    <li class="nav-item">
+                                        <a href="{{ url("/kardexLimpieza") }}" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Kardex de Productos</p>
+                                        </a>
+                                    </li>
+
+                                    </ul>
+                                </li>
+
+                                <!--=====================================
                                 Botón Fuas Generados
                                 ======================================-->
                                 @can('VER_REPORTES')
@@ -289,6 +349,30 @@
                                         </a>
                                     </li>
                                 <!-- @endcan -->
+
+                                <!--=====================================
+                                Botón Reportes
+                                ======================================-->
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link">
+                                    <i class="nav-icon fas fa-file"></i>
+                                    <p>
+                                        Reportes
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
+                                    </a>
+
+                                    <ul class="nav nav-treeview">
+
+                                        <li class="nav-item">
+                                            <a href="{{ url("/reportesEntreFechas") }}" class="nav-link">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Entre Fechas</p>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </li>
                         @endif
                     @endforeach
         </ul>
