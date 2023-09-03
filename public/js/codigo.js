@@ -756,6 +756,11 @@ $("#precio_gasto_update").bind("keyup keydown change", function() {
 	}
 });
 
+$("#botonGuardarDatosGastos").click(function(event){
+	$("#botonGuardarDatosGastos").prop('disabled',true)
+	$('#formSubmitGuardar').submit();
+})
+
 
 
 

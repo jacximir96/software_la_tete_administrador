@@ -119,7 +119,7 @@
 <div class="modal fade" id="crearUnidadMedida">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="POST" action="{{ url('/') }}/gastos">
+            <form method="POST" action="{{ url('/') }}/gastos" id="formSubmitGuardar">
                 @csrf
 
                 <div class="modal-header" style="background:#2B7D73;border-radius:0px;">
@@ -232,7 +232,7 @@
                     </div>
 
                     <div>
-                        <button type="submit" class="btn btn-success boton-general">Guardar datos</button>
+                        <button type="submit" class="btn btn-success boton-general" id="botonGuardarDatosGastos">Guardar datos</button>
                     </div>
                 </div>
             </form>
