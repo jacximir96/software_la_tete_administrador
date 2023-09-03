@@ -756,12 +756,10 @@ $("#precio_gasto_update").bind("keyup keydown change", function() {
 	}
 });
 
-$("#botonGuardarDatosGastos").click(function(event){
+$('#formSubmitGuardar').submit(function(event){
+	$("#formSubmitGuardar").validate();
 	$("#botonGuardarDatosGastos").prop('disabled',true)
-	$('#formSubmitGuardar').submit();
 })
-
-
 
 
 
