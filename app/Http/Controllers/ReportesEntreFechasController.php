@@ -36,12 +36,14 @@ class ReportesEntreFechasController extends Controller
         $datos = array("fecha_inicial"=>$request->input("fecha_inicial_reportes"),
                        "fecha_final"=>$request->input("fecha_final_reportes"));
 
-        $ingresosPorFechas = DB::SELECT("SELECT ROUND(SUM(cfac_monto_total),2) AS cfac_monto_total, created_at FROM cabecera_factura
-                                        WHERE date(created_at) BETWEEN :fecha_inicial AND :fecha_final GROUP BY DATE(created_at)",
+        $ingresosPorFechas = DB::SELECT("SELECT ROUND(SUM(ca.cfac_monto_total),2) AS cfac_monto_total, pe.created_at FROM cabecera_factura ca
+                                        INNER JOIN periodo pe ON ca.IDPeriodo = pe.IDPeriodo
+                                        WHERE date(pe.created_at) BETWEEN :fecha_inicial AND :fecha_final GROUP BY DATE(pe.created_at)",
                                         ['fecha_inicial'=>$datos["fecha_inicial"],'fecha_final'=>$datos["fecha_final"]]);
 
-        $egresosPorFechas = DB::SELECT("SELECT ROUND(SUM(preciot_gasto),2) AS precio_gasto, created_at FROM gastos
-                                        WHERE date(created_at) BETWEEN :fecha_inicial AND :fecha_final GROUP BY DATE(created_at)",
+        $egresosPorFechas = DB::SELECT("SELECT ROUND(SUM(ga.preciot_gasto),2) AS precio_gasto, pe.created_at FROM gastos ga
+                                        INNER JOIN periodo pe ON ga.IDPeriodo = pe.IDPeriodo
+                                        WHERE date(pe.created_at) BETWEEN :fecha_inicial AND :fecha_final GROUP BY DATE(pe.created_at)",
                                         ['fecha_inicial'=>$datos["fecha_inicial"],'fecha_final'=>$datos["fecha_final"]]);
 
         view()->share('datos',$datos);
@@ -58,8 +60,9 @@ class ReportesEntreFechasController extends Controller
         $datos = array("fecha_inicial"=>$request->input("fecha_inicial_reportes"),
                        "fecha_final"=>$request->input("fecha_final_reportes"));
 
-        $cierreCajaPorFechas = DB::SELECT("SELECT ROUND(cc_monto,2) AS cc_monto, created_at FROM caja_cuadre
-                                          WHERE date(created_at) BETWEEN :fecha_inicial AND :fecha_final",
+        $cierreCajaPorFechas = DB::SELECT("SELECT ROUND(cc.cc_monto,2) AS cc_monto, pe.created_at FROM caja_cuadre cc
+                                          INNER JOIN periodo pe ON cc.IDPeriodo = pe.IDPeriodo
+                                          WHERE date(pe.created_at) BETWEEN :fecha_inicial AND :fecha_final",
                                           ['fecha_inicial'=>$datos["fecha_inicial"],'fecha_final'=>$datos["fecha_final"]]);
 
         view()->share('datos',$datos);

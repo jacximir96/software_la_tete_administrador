@@ -71,6 +71,7 @@ class GastosController extends Controller
                 $gasto->estado_gasto = $datos["estado_gasto"];
                 $gasto->id_usuario = $datos["usuario_gasto"];
                 $gasto->id_unidadMedida = $datos["unidadMedida_gasto"];
+                $gasto->IDPeriodo = $this->retornarPeriodoActivo();
                 $gasto->save();
 
                 return redirect('/gastos')->with("ok-crear", "");
@@ -78,6 +79,11 @@ class GastosController extends Controller
         } else {
             return redirect('/gastos')->with("error", "");
         }
+    }
+
+    public function retornarPeriodoActivo() {
+        $periodo = DB::select('SELECT IDPeriodo FROM periodo WHERE IDStatus = 3');
+        return $periodo[0]->IDPeriodo;
     }
 
     public function destroy($id)

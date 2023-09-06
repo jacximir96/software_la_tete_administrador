@@ -9,6 +9,7 @@ use App\CabeceraFacturaModel;
 use App\CabeceraOrdenPedidoModel;
 use App\DetalleOrdenPedidoModel;
 use App\CajaCuadreModel;
+use App\PeriodoModel;
 use Illuminate\Support\Facades\DB;/* Agregar conbinaciones de tablas en la base de datos */
 use PDF;/* Apuntamos al modelo que existe por defecto para obtener información en PDF */
 use Maatwebsite\Excel\Facades\Excel;
@@ -90,6 +91,7 @@ class UnidadesMedidaController extends Controller
         $cabeceraOrdenPedido->odp_monto_total = $request->odp_monto_total;
         $cabeceraOrdenPedido->IDMesa = $request->IDMesa;
         $cabeceraOrdenPedido->IDStatus = $request->IDStatus;
+        $cabeceraOrdenPedido->IDPeriodo = $this->retornarPeriodoActivo();
         $cabeceraOrdenPedido->save();
 
         $insertedId = $cabeceraOrdenPedido->id;
@@ -200,6 +202,7 @@ class UnidadesMedidaController extends Controller
         $cabeceraFactura->cfac_monto_total = $validaciónPorTarjeta;
         $cabeceraFactura->IDFormaPago = $request->valueFormaPago;
         $cabeceraFactura->IDStatus = 4;
+        $cabeceraFactura->IDPeriodo = $this->retornarPeriodoActivo();
         $cabeceraFactura->save();
 
         $insertedId = $cabeceraFactura->id;
@@ -237,6 +240,7 @@ class UnidadesMedidaController extends Controller
     public function actualizarTotalRegistrosCierreCaja(Request $request) {
         $cabeceraFactura = new CajaCuadreModel();
         $cabeceraFactura->cc_monto = $request->calculoMontoCaja;
+        $cabeceraFactura->IDPeriodo = $this->retornarPeriodoActivo();
         $cabeceraFactura->save();
 
         $updateStatusTotalGastos = DB::UPDATE("UPDATE gastos SET control_gasto = 1 WHERE 
@@ -245,7 +249,43 @@ class UnidadesMedidaController extends Controller
         $updateStatusTotalCabeceraFactura = DB::UPDATE("UPDATE cabecera_factura SET cfac_status_control = 1 WHERE 
         cfac_status_control = 0");
 
+        //EL ULTIMO PERIODO CARGADO ACTUALIZAR AL CERRAR CAJA
+        $fecha = Carbon::now();
+
+        $updateStatusPeriodo = DB::UPDATE("UPDATE periodo SET prd_fechacierre = ?,prd_usuariocierre=1,IDStatus=4 WHERE IDStatus = 3",[
+            $fecha->toDateTimeString()
+        ]);
+
+        $updatePermissionCrearGasto = DB::UPDATE("UPDATE permissions SET name = 'crear_gastos1' WHERE id = 113");
+
         return $this->response_json(200, "", $updateStatusTotalCabeceraFactura);
+    }
+
+    public function abrirPeriodoVenta() {
+        $fecha = Carbon::now();
+
+        $periodo = new PeriodoModel();
+        $periodo->prd_fechaapertura = $fecha->toDateTimeString();
+        $periodo->prd_fechacierre = null;
+        $periodo->prd_usuarioapertura = 1;
+        $periodo->prd_usuariocierre = null;
+        $periodo->IDStatus = 3;
+        $periodo->save();
+
+        $updatePermissionCrearGasto = DB::UPDATE("UPDATE permissions SET name = 'crear_gastos' WHERE id = 113");
+
+        return $this->response_json(200, "", $periodo);
+    }
+
+    public function verificarPeriodoActivo(Request $request) {
+        $periodo = DB::select('SELECT * FROM periodo WHERE IDStatus = 3');
+
+        return $this->response_json(200, "", $periodo);
+    }
+
+    public function retornarPeriodoActivo() {
+        $periodo = DB::select('SELECT IDPeriodo FROM periodo WHERE IDStatus = 3');
+        return $periodo[0]->IDPeriodo;
     }
 
     protected function response_json($status_code = 0, $msg = "", $data = null)

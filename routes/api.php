@@ -34,4 +34,6 @@ Route::group(['prefix' => 'auth','middleware' => ['cors']], function () {
     Route::get('totalRegistrosCierreCaja', 'UnidadesMedidaController@totalRegistrosCierreCaja');
     Route::get('actualizarTotalRegistrosCierreCaja', 'UnidadesMedidaController@actualizarTotalRegistrosCierreCaja');
     Route::post('iniciarSesion', 'UnidadesMedidaController@iniciarSesion');
+    Route::get('verificarPeriodoActivo', 'UnidadesMedidaController@verificarPeriodoActivo');
+    Route::get('abrirPeriodoVenta', 'UnidadesMedidaController@abrirPeriodoVenta');
 });
