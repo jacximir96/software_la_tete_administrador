@@ -240,6 +240,9 @@ class UnidadesMedidaController extends Controller
     public function actualizarTotalRegistrosCierreCaja(Request $request) {
         $cabeceraFactura = new CajaCuadreModel();
         $cabeceraFactura->cc_monto = $request->calculoMontoCaja;
+        $cabeceraFactura->cc_monto_efectivo = $request->cantidadSumaTotalEfectivo;
+        $cabeceraFactura->cc_monto_izipay = $request->cantidadSumaTotalIzipay;
+        $cabeceraFactura->cc_monto_interbank = $request->cantidadSumaTotalInterbank;
         $cabeceraFactura->IDPeriodo = $this->retornarPeriodoActivo();
         $cabeceraFactura->save();
 
