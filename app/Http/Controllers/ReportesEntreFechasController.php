@@ -60,7 +60,8 @@ class ReportesEntreFechasController extends Controller
         $datos = array("fecha_inicial"=>$request->input("fecha_inicial_reportes"),
                        "fecha_final"=>$request->input("fecha_final_reportes"));
 
-        $cierreCajaPorFechas = DB::SELECT("SELECT ROUND(cc.cc_monto,2) AS cc_monto, pe.created_at FROM caja_cuadre cc
+        $cierreCajaPorFechas = DB::SELECT("SELECT ROUND(cc.cc_monto,2) AS cc_monto, pe.created_at, ROUND(cc.cc_monto_efectivo,2) as cc_monto_efectivo, 
+                                          ROUND(cc.cc_monto_izipay,2) as cc_monto_izipay, ROUND(cc.cc_monto_interbank,2) as cc_monto_interbank FROM caja_cuadre cc
                                           INNER JOIN periodo pe ON cc.IDPeriodo = pe.IDPeriodo
                                           WHERE date(pe.created_at) BETWEEN :fecha_inicial AND :fecha_final",
                                           ['fecha_inicial'=>$datos["fecha_inicial"],'fecha_final'=>$datos["fecha_final"]]);

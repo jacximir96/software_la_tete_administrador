@@ -24,13 +24,16 @@
     <table class="table table-bordered table-sm" id="tabla_cronogramaGeneral" style="text-align:center;">
         <thead class="thead-light">
             <tr style="background:#B2CFB6;">
-                <th colspan="3" style="vertical-align : middle;text-align:center;" scope="col">CIERRE CAJA</th>
+                <th colspan="6" style="vertical-align : middle;text-align:center;" scope="col">CIERRE CAJA</th>
             </tr>
 
             <tr style="background:#B2CFB6;">
                 <th style="vertical-align : middle;text-align:center;">#</th>
                 <th style="vertical-align : middle;text-align:center;">Fecha</th>
-                <th style="vertical-align : middle;text-align:center;">Monto</th>
+                <th style="vertical-align : middle;text-align:center;">Monto Total</th>
+                <th style="vertical-align : middle;text-align:center;">Efectivo</th>
+                <th style="vertical-align : middle;text-align:center;">Izipay</th>
+                <th style="vertical-align : middle;text-align:center;">Interbank</th>
             </tr>
         </thead>
 
@@ -40,6 +43,9 @@
                 <td>{{($key+1)}}</td>
                 <td>{{\Carbon\Carbon::parse($valor_cierreCajaPorFechas->created_at)->format('d-m-Y')}}</td>
                 <td>S/ {{$valor_cierreCajaPorFechas->cc_monto}}</td>
+                <td>S/ {{$valor_cierreCajaPorFechas->cc_monto_efectivo}}</td>
+                <td>S/ {{$valor_cierreCajaPorFechas->cc_monto_izipay}}</td>
+                <td>S/ {{$valor_cierreCajaPorFechas->cc_monto_interbank}}</td>
             </tr>
         @endforeach
         </tbody>
