@@ -66,7 +66,7 @@ class ProductosLimpiezaController extends Controller
                     "nombre_productoLimpieza"=>'required|regex:/^[°\\_\\-\\/\\0-9a-zA-ZñÑáéíóúÁÉÍÓÚ ]+$/i',
                     "descripcion_productoLimpieza"=>'required|regex:/^[°\\=\\-\\/\\.\\,\\:\\_\\+\\!\\#\\$\\%\\&\\?\\¡\\¿\\0-9a-zA-ZñÑáéíóúÁÉÍÓÚ ]+$/i',
                     "stock_productoLimpieza"=>'required|regex:/^[0-9]+$/i',
-                    "precio_productoLimpieza"=>'required|regex:/^[0-9]+$/i',
+                    "precio_productoLimpieza"=>'required|regex:/^[.\\0-9]+$/i',
                     "unidadMedida_productoLimpieza"=>'required',
                     "usuario_productoLimpieza"=>'required'
                 ]);
@@ -171,7 +171,7 @@ class ProductosLimpiezaController extends Controller
                 "nombre_productoLimpieza"=>'required|regex:/^[°\\_\\-\\/\\0-9a-zA-ZñÑáéíóúÁÉÍÓÚ ]+$/i',
                 "descripcion_productoLimpieza"=>'required|regex:/^[°\\=\\-\\/\\.\\,\\:\\_\\+\\!\\#\\$\\%\\&\\?\\¡\\¿\\0-9a-zA-ZñÑáéíóúÁÉÍÓÚ ]+$/i',
                 "stock_productoLimpieza"=>'required|regex:/^[0-9]+$/i',
-                "precio_productoLimpieza"=>'required|regex:/^[0-9]+$/i',
+                "precio_productoLimpieza"=>'required|regex:/^[.\\0-9]+$/i',
                 "usuario_productoLimpieza"=>'required'
             ]);
 
