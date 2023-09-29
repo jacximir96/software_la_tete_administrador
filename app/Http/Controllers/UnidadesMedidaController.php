@@ -44,7 +44,7 @@ class UnidadesMedidaController extends Controller
 
     public function listarCategorias()
     {
-        $categorias = DB::select('SELECT * FROM categorias');
+        $categorias = DB::select('SELECT * FROM categorias ORDER BY nombre_categoria ASC');
 
         return $this->response_json(200, "", $categorias);
     }
@@ -58,7 +58,7 @@ class UnidadesMedidaController extends Controller
 
     public function listarProductoPorCategoria(Request $request)
     {
-        $productoCategoria = DB::select('SELECT * FROM productos_limpieza WHERE id_categoria = ?', [$request->idCategoriaSelected]);
+        $productoCategoria = DB::select('SELECT * FROM productos_limpieza WHERE id_categoria = ? ORDER BY nombre_productoLimpieza ASC', [$request->idCategoriaSelected]);
 
         return $this->response_json(200, "", $productoCategoria);
     }
