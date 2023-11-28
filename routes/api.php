@@ -33,7 +33,7 @@ Route::group(['prefix' => 'auth','middleware' => ['cors']], function () {
     Route::get('cobrarPedidoMesaSeleccionada', 'UnidadesMedidaController@cobrarPedidoMesaSeleccionada');
     Route::get('totalRegistrosCierreCaja', 'UnidadesMedidaController@totalRegistrosCierreCaja');
     Route::get('actualizarTotalRegistrosCierreCaja', 'UnidadesMedidaController@actualizarTotalRegistrosCierreCaja');
-    Route::post('iniciarSesion', 'UnidadesMedidaController@iniciarSesion');
+    Route::get('iniciarSesion', 'UnidadesMedidaController@iniciarSesion');
     Route::get('verificarPeriodoActivo', 'UnidadesMedidaController@verificarPeriodoActivo');
     Route::get('abrirPeriodoVenta', 'UnidadesMedidaController@abrirPeriodoVenta');
 });

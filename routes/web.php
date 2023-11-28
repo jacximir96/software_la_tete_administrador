@@ -174,6 +174,7 @@ Route::get('/reportesEntreFechas','ReportesEntreFechasController@index');
 Route::get('/reportesEntreFechas/entreFechasPDF','ReportesEntreFechasController@createPdfIngresosEgresos');
 Route::get('/reportesEntreFechas1/entreFechasPDF','ReportesEntreFechasController@createPdfCierreCaja');
 Route::get('/reportesEntreFechas2/entreFechasPDF','ReportesEntreFechasController@createPDF2');
+Route::get('/reportesEntreFechas3/entreFechasPDF','ReportesEntreFechasController@createPdfVentas');
 
 Route::resource('/kardexLimpieza','KardexLimpiezaController');
 Route::get('/kardexLimpieza','KardexLimpiezaController@index');

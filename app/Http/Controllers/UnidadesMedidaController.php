@@ -77,7 +77,7 @@ class UnidadesMedidaController extends Controller
         if (count($usuario) == 0) {
             return $this->response_json(400, "Usuario no existe");
         } else {
-            if ($request->clave !== 'abc123$$') {
+            if (!Hash::check($request->clave, $usuario[0]->password)) {
                 return $this->response_json(400, "Error de credencial");
             }
 

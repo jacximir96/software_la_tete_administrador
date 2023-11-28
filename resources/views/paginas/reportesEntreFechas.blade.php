@@ -83,6 +83,36 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <form action="{{ url('/') }}/reportesEntreFechas3/entreFechasPDF" method="get" target="_blank" id="formulario_reporteFechasVentas">
+
+                                <h4>Ventas</h4>
+                                </br>
+
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <label for="fecha_inicial_reportes">Fecha Inicial</label>
+                                            <input type="date" class="form-control" name="fecha_inicial_reportes" id="fecha_inicial_reportes" required autofocus onfocus="(this.type='date')">
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <label for="fecha_final_reportes">Fecha Final</label>
+                                            <input type="date" class="form-control" name="fecha_final_reportes" id="fecha_final_reportes" autofocus onfocus="(this.type='date')" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button style="float:right;" class="btn btn-primary btn-sm" type="submit" id="guardar_reporteFechasGeneral">GENERAR REPORTE (PDF)</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 </div>

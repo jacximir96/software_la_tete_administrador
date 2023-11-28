@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;/* Agregar conbinaciones de tablas en la base 
 use PDF;/* Apuntamos al modelo que existe por defecto para obtener información en PDF */
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RecepcionLimpiezaExport;
+use App\DetalleOrdenPedidoModel;
 
 class ReportesEntreFechasController extends Controller
 {
@@ -72,6 +73,38 @@ class ReportesEntreFechasController extends Controller
         $pdf = PDF::loadView('paginas.reportesEntreFechas1',$cierreCajaPorFechas);
         $nombreArchivo = "cierresCaja(".$datos["fecha_inicial"].")/(".$datos["fecha_final"].")";
         return $pdf->setPaper('a5','landscape')->stream($nombreArchivo.'.pdf');
+      }
+
+      public function createPdfVentas(Request $request) {
+
+        $datos = array("fecha_inicial"=>$request->input("fecha_inicial_reportes"),
+                       "fecha_final"=>$request->input("fecha_final_reportes"));
+
+        $ventasPorFechas = DB::SELECT(" SELECT cf.cfac_correlativo, cf.cfac_ordenes_pedido,cf.cfac_monto_total,p.prd_fechaapertura,fp.fp_descripcion 
+                                        FROM cabecera_factura cf
+                                        INNER JOIN periodo p ON cf.IDPeriodo = p.IDPeriodo
+                                        INNER JOIN forma_pago fp ON cf.IDFormaPago = fp.IDFormaPago
+                                        WHERE date(p.prd_fechaapertura) = :fecha_inicial
+                                        ORDER BY cf.cfac_correlativo ASC",
+                                        ['fecha_inicial'=>$datos["fecha_inicial"]]);
+
+        $response["ventas"] = $ventasPorFechas;
+
+        foreach ($response["ventas"] as $key => $ventaPorFecha) {
+                $productosCabeceraOrdenPedido = DB::SELECT("SELECT * FROM detalle_orden_pedido dop INNER JOIN productos_limpieza pl ON dop.IDProducto = pl.id_ProductoLimpieza
+                                                            WHERE dop.IDCabeceraOrdenPedido IN (".$ventaPorFecha->cfac_ordenes_pedido.")");
+                          
+                $response["ventas"][$key]->productosCabeceraOrdenPedido = $productosCabeceraOrdenPedido;
+        }
+
+        $responseGeneral = $response["ventas"];
+
+        view()->share('datos',$datos);
+        view()->share('responseGeneral',$responseGeneral);
+
+        $pdf = PDF::loadView('paginas.reportesEntreFechas3',$responseGeneral);
+        $nombreArchivo = "ventas(".$datos["fecha_inicial"].")/(".$datos["fecha_final"].")";
+        return $pdf->setPaper('a4','landscape')->stream($nombreArchivo.'.pdf');
       }
 
       public function createPDF1(Request $request) {
