@@ -92,6 +92,7 @@ class UnidadesMedidaController extends Controller
         $cabeceraOrdenPedido->IDMesa = $request->IDMesa;
         $cabeceraOrdenPedido->IDStatus = $request->IDStatus;
         $cabeceraOrdenPedido->IDPeriodo = $this->retornarPeriodoActivo();
+        $cabeceraOrdenPedido->odp_despachado = 0;
         $cabeceraOrdenPedido->save();
 
         $insertedId = $cabeceraOrdenPedido->id;
@@ -105,6 +106,7 @@ class UnidadesMedidaController extends Controller
             $detalleOrdenPedido->dop_cantidad = $detalleOrdenPedidoValue['cantidad'];
             $detalleOrdenPedido->dop_precio = $detalleOrdenPedidoValue['precio'];
             $detalleOrdenPedido->dop_total = $detalleOrdenPedidoValue['total'];
+            $detalleOrdenPedido->observacion = $detalleOrdenPedidoValue['observacion'];
             $detalleOrdenPedido->save();
         }
 
@@ -152,6 +154,63 @@ class UnidadesMedidaController extends Controller
         return $this->response_json(200, "", array($jsonEnvioArreglo));
     }
 
+    public function getDatosCabeceraOrdenPedidoMesas()
+    {
+        $datosCabeceraOrdenPedidoMesas = DB::SELECT(
+            'SELECT me.IDMesa 
+            FROM cabecera_orden_pedido cop INNER JOIN mesa me 
+            ON cop.IDMesa = me.IDMesa WHERE cop.IDStatus = 3 GROUP BY me.IDMesa'
+        );
+
+        $jsonEnvioArregloGeneral = [];
+
+        foreach ($datosCabeceraOrdenPedidoMesas as $datosCabeceraOrdenPedidoMesa) {
+
+            $datosCabeceraOrdenPedido = DB::select(
+            'SELECT cop.odp_monto_total,cop.IDCabeceraOrdenPedido,cop.odp_correlativo,cop.created_at,me.mesa_descripcion 
+            FROM cabecera_orden_pedido cop INNER JOIN mesa me 
+            ON cop.IDMesa = me.IDMesa WHERE cop.IDMesa = :idMesaSeleccionadaActual AND cop.IDStatus = 3 AND (cop.odp_despachado = 0 OR cop.odp_despachado IS NULL)',
+                ["idMesaSeleccionadaActual" => $datosCabeceraOrdenPedidoMesa->IDMesa]
+            );
+
+            if(!empty($datosCabeceraOrdenPedido)) {
+                $arregloIdentificador = [];
+                $arregloSumaTotal = array();
+        
+                foreach ($datosCabeceraOrdenPedido as $datosCabeceraOrdenPedidoIdentificador) {
+                    array_push($arregloIdentificador, $datosCabeceraOrdenPedidoIdentificador->IDCabeceraOrdenPedido);
+                    array_push($arregloSumaTotal, $datosCabeceraOrdenPedidoIdentificador->odp_monto_total);
+                    $mesaDescripcion = $datosCabeceraOrdenPedidoIdentificador->mesa_descripcion;
+                    $fechaUltimoPedido = $datosCabeceraOrdenPedidoIdentificador->created_at;
+                }
+        
+                $valorSeparadoComas = implode(",", $arregloIdentificador);
+        
+                if (!empty($datosCabeceraOrdenPedido)) {
+                    $datosDetalleOrdenPedido = DB::SELECT("SELECT pl.id_productoLimpieza,ca.nombre_categoria,SUM(dop.dop_cantidad) AS dop_cantidad,
+                    dop.IDDetalleOrdenPedido,pl.nombre_productoLimpieza,dop.dop_precio,SUM(dop.dop_total) AS dop_total,dop.observacion
+                    FROM detalle_orden_pedido dop
+                    INNER JOIN productos_limpieza pl ON dop.IDProducto = pl.id_productoLimpieza
+                    INNER JOIN categorias ca ON pl.id_categoria = ca.id_categoria WHERE
+                    IDCabeceraOrdenPedido IN (" . $valorSeparadoComas . ") GROUP BY pl.id_productoLimpieza");
+                }
+        
+                $jsonEnvioArreglo = [
+                    "odp_monto_total" => array_sum($arregloSumaTotal),
+                    "odp_correlativo" => null,
+                    "created_at"      => $fechaUltimoPedido,
+                    "mesa_descripcion" => $mesaDescripcion,
+                    "detalleOrdenPedido" => $datosDetalleOrdenPedido,
+                    "id_cabedera_ordenes_pedido" => $valorSeparadoComas
+                ];
+    
+                array_push($jsonEnvioArregloGeneral,$jsonEnvioArreglo);
+            }
+        }
+
+        return $this->response_json(200, "", array($jsonEnvioArregloGeneral));
+    }
+
     public function getDatosDetalleOrdenPedido(Request $request)
     {
         $datosCabeceraOrdenPedido = DB::select('SELECT cop.odp_correlativo,cop.created_at,me.mesa_descripcion 
@@ -166,6 +225,26 @@ class UnidadesMedidaController extends Controller
     {
         $updateStatusMesa = DB::UPDATE("UPDATE mesa SET IDStatus = :IDStatus WHERE IDMesa = :IDMesa", ["IDStatus" => $request->IDStatus, "IDMesa" => $request->IDMesa]);
         return $this->response_json(200, "", $updateStatusMesa);
+    }
+
+    public function actualizarDatosDespachoCocina(Request $request)
+    {
+        $fechaHoy = date("Y-m-d H:i:s");
+        $convertirFechaIndicada = str_replace("+"," ",$request->hora_inicial_pedido);
+
+        $explode = explode(" ",$convertirFechaIndicada);
+        $explode1 = explode(":",$explode[1]);
+
+        $explodeFechaHoy = explode(" ",$fechaHoy);
+        $explode1FechaHoy = explode(":",$explodeFechaHoy[1]);
+
+        //Convertir fecha obtenida en minutos para resta
+        $horasMinutos = $explode1[0] * 60 + $explode1[1];//obtenermos los minutos de la fecha recibida
+        $horasMinutosFechaHoy = $explode1FechaHoy[0] * 60 + $explode1FechaHoy[0];//obtenemos la fecha actual
+        $restaTiempoTranscurrido = $horasMinutosFechaHoy - $horasMinutos;
+
+        $updateStatusCabeceraOrdenPedidoDespachado = DB::UPDATE("UPDATE cabecera_orden_pedido SET odp_despachado = 1,odp_tiempo_despacho = ".$restaTiempoTranscurrido." WHERE IDCabeceraOrdenPedido IN (".$request->id_cabecera_ordenes_pedido.")");
+        return $this->response_json(200, "", $updateStatusCabeceraOrdenPedidoDespachado);
     }
 
     public function cobrarPedidoMesaSeleccionada(Request $request)

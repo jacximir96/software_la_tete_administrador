@@ -30,7 +30,9 @@ Route::group(['prefix' => 'auth','middleware' => ['cors']], function () {
     Route::get('createOrdenPedido', 'UnidadesMedidaController@createOrdenPedido');
     Route::get('cambiarStatusMesa', 'UnidadesMedidaController@cambiarStatusMesa');
     Route::get('getDatosCabeceraOrdenPedido', 'UnidadesMedidaController@getDatosCabeceraOrdenPedido');
+    Route::get('getDatosCabeceraOrdenPedidoMesas', 'UnidadesMedidaController@getDatosCabeceraOrdenPedidoMesas');
     Route::get('cobrarPedidoMesaSeleccionada', 'UnidadesMedidaController@cobrarPedidoMesaSeleccionada');
+    Route::get('actualizarDatosDespachoCocina', 'UnidadesMedidaController@actualizarDatosDespachoCocina');
     Route::get('totalRegistrosCierreCaja', 'UnidadesMedidaController@totalRegistrosCierreCaja');
     Route::get('actualizarTotalRegistrosCierreCaja', 'UnidadesMedidaController@actualizarTotalRegistrosCierreCaja');
     Route::get('iniciarSesion', 'UnidadesMedidaController@iniciarSesion');
