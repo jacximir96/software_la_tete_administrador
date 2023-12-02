@@ -230,9 +230,9 @@ class UnidadesMedidaController extends Controller
     public function actualizarDatosDespachoCocina(Request $request)
     {
         $fechaHoy = date("Y-m-d H:i:s");
-        $convertirFechaIndicada = str_replace("+"," ",$request->hora_inicial_pedido);
+        //$convertirFechaIndicada = str_replace("+"," ",$request->hora_inicial_pedido);
 
-        $explode = explode(" ",$convertirFechaIndicada);
+        $explode = explode(" ",$request->hora_inicial_pedido);
         $explode1 = explode(":",$explode[1]);
 
         $explodeFechaHoy = explode(" ",$fechaHoy);
@@ -240,8 +240,12 @@ class UnidadesMedidaController extends Controller
 
         //Convertir fecha obtenida en minutos para resta
         $horasMinutos = $explode1[0] * 60 + $explode1[1];//obtenermos los minutos de la fecha recibida
-        $horasMinutosFechaHoy = $explode1FechaHoy[0] * 60 + $explode1FechaHoy[0];//obtenemos la fecha actual
-        $restaTiempoTranscurrido = $horasMinutosFechaHoy - $horasMinutos;
+        $horasMinutosFechaHoy = $explode1FechaHoy[0] * 60 + $explode1FechaHoy[1];//obtenemos la fecha actual
+
+        $horasMinutosFechaHoyInt = (int) $horasMinutosFechaHoy;
+        $horasMinutosInt = (int) $horasMinutos;
+
+        $restaTiempoTranscurrido = $horasMinutosFechaHoyInt - $horasMinutosInt;
 
         $updateStatusCabeceraOrdenPedidoDespachado = DB::UPDATE("UPDATE cabecera_orden_pedido SET odp_despachado = 1,odp_tiempo_despacho = ".$restaTiempoTranscurrido." WHERE IDCabeceraOrdenPedido IN (".$request->id_cabecera_ordenes_pedido.")");
         return $this->response_json(200, "", $updateStatusCabeceraOrdenPedidoDespachado);
