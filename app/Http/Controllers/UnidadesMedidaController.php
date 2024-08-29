@@ -10,12 +10,16 @@ use App\CabeceraOrdenPedidoModel;
 use App\DetalleOrdenPedidoModel;
 use App\CajaCuadreModel;
 use App\PeriodoModel;
+use App\ClienteModel;
 use Illuminate\Support\Facades\DB;/* Agregar conbinaciones de tablas en la base de datos */
 use PDF;/* Apuntamos al modelo que existe por defecto para obtener información en PDF */
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\UnidadesMedidaExport;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Config;
 
 class UnidadesMedidaController extends Controller
 {
@@ -87,6 +91,61 @@ class UnidadesMedidaController extends Controller
 
     public function createOrdenPedido(Request $request)
     {
+        try {
+            $tipoDocumento = 'orden_pedido';
+            $cabeceraOrdenPedido = $this->crearCabeceraOrdenPedido($request);
+            $this->actualizarCorrelativo($cabeceraOrdenPedido->id, $tipoDocumento);
+            $detalleOrdenPedidoJson = $this->procesarDetalleOrdenPedido($request->detalleOrdenPedido, $cabeceraOrdenPedido->id);
+
+            Log::info("APPLY_PRINTER_LOCAL: " . Config::get('app.APPLY_PRINTER_LOCAL'));
+            if ( Config::get('app.APPLY_PRINTER_LOCAL', false) ) {
+                $payload = $this->prepararDatosImpresion($cabeceraOrdenPedido->id, $tipoDocumento, $cabeceraOrdenPedido, $detalleOrdenPedidoJson, $request->IDMesa);
+
+                try {
+                    $this->enviarImpresion($payload);
+                } catch (\Exception $printException) {
+                    Log::error("Error al intentar imprimir: " . $printException->getMessage());
+                }
+
+                $mensajeRespuesta = 'Orden de pedido y impresión realizada con éxito';
+            } else {
+                $payload = $cabeceraOrdenPedido;
+                $mensajeRespuesta = 'Orden de pedido creada con éxito';
+            }
+
+            return $this->response_json(200, $mensajeRespuesta, $payload);
+    
+        } catch (\Exception $e) {
+            Log::error("Error al crear la orden de pedido: " . $e->getMessage());
+            return $this->response_json(500, "Ha ocurrido un error durante la creación de la orden de pedido.", [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function createCliente(Request $request)
+    {
+        $cliente = new ClienteModel();
+        $cliente->cli_nombres = $request->cli_nombres;
+        $cliente->cli_documento = $request->cli_documento;
+        $cliente->cli_telefono = $request->cli_telefono;
+        $cliente->cli_direccion = $request->cli_direccion;
+        $cliente->cli_email = $request->cli_email;
+        $cliente->save();
+    
+        return $this->response_json(200, "", $cliente);
+    }
+
+    public function obtenerCliente(Request $request)
+    {
+        $clienteById = DB::select('SELECT * FROM cliente WHERE 	cli_documento = ?', [$request->cli_documento]);
+
+        return $this->response_json(200, "", $clienteById);
+    }
+
+    /* Funciones referente a la creación de orden de pedido y sus detalles - Inicio */
+    private function crearCabeceraOrdenPedido(Request $request)
+    {
         $cabeceraOrdenPedido = new CabeceraOrdenPedidoModel();
         $cabeceraOrdenPedido->odp_monto_total = $request->odp_monto_total;
         $cabeceraOrdenPedido->IDMesa = $request->IDMesa;
@@ -94,24 +153,298 @@ class UnidadesMedidaController extends Controller
         $cabeceraOrdenPedido->IDPeriodo = $this->retornarPeriodoActivo();
         $cabeceraOrdenPedido->odp_despachado = 0;
         $cabeceraOrdenPedido->save();
+    
+        return $cabeceraOrdenPedido;
+    }
 
-        $insertedId = $cabeceraOrdenPedido->id;
+    private function crearCabeceraFactura(Request $request)
+    {
+        $ordenesPedidoSuma = DB::select(
+            'SELECT SUM(odp_monto_total) as odp_monto_total_suma FROM cabecera_orden_pedido WHERE IDMesa = :IDMesa AND IDStatus = 3',
+            ["IDMesa" => $request->idMesaSeleccionadaActual]
+        );
+
+        $ordenesPedidoIdentificador = DB::select(
+            'SELECT IDCabeceraOrdenPedido FROM cabecera_orden_pedido WHERE IDMesa = :IDMesa AND IDStatus = 3',
+            ["IDMesa" => $request->idMesaSeleccionadaActual]
+        );
+
+        $arregloIdentificador = [];
+
+        foreach ($ordenesPedidoIdentificador as $ordenesIdentificador) {
+            array_push($arregloIdentificador, $ordenesIdentificador->IDCabeceraOrdenPedido);
+        }
+
+        $calculoTarjetaPorcentaje34 = $ordenesPedidoSuma[0]->odp_monto_total_suma * 0.0344;
+        $calculoTarjetaPorcentaje18 = $calculoTarjetaPorcentaje34 * 0.18;
+        $calculoTotalPorcenaje = $calculoTarjetaPorcentaje34 + $calculoTarjetaPorcentaje18;
+
+        $valorSeparadoComas = implode(",", $arregloIdentificador);
+
+        $validacionPorTarjeta = $request->valueFormaPago == 2 ? 
+        $ordenesPedidoSuma[0]->odp_monto_total_suma - $calculoTotalPorcenaje : 
+        $ordenesPedidoSuma[0]->odp_monto_total_suma;
+
+        $cabeceraFactura = new CabeceraFacturaModel();
+        $cabeceraFactura->cfac_ordenes_pedido = $valorSeparadoComas;
+        $cabeceraFactura->cfac_monto_total = number_format((float)$validacionPorTarjeta, 2, '.', '');
+        $cabeceraFactura->IDFormaPago = $request->valueFormaPago;
+        $cabeceraFactura->IDStatus = 4;
+        $cabeceraFactura->IDPeriodo = $this->retornarPeriodoActivo();
+        $cabeceraFactura->IDCliente = $request->valueClienteID;
+        $cabeceraFactura->save();
+
+        return $cabeceraFactura;
+    }
+
+    private function actualizarCorrelativo($insertedId, $tipoDocumento, $valorSeparadoComas = null)
+    {
         $numero_final = str_pad($insertedId, 10, '0', STR_PAD_LEFT);
-        DB::UPDATE("UPDATE cabecera_orden_pedido SET odp_correlativo = :correlativo WHERE IDCabeceraOrdenPedido = :idInsert", ["correlativo" => $numero_final, "idInsert" => $insertedId]);
 
-        foreach ($request->detalleOrdenPedido as $detalleOrdenPedidoValue) {
+        if ( $tipoDocumento == 'orden_pedido' )
+        {
+            DB::UPDATE("UPDATE cabecera_orden_pedido SET odp_correlativo = :correlativo WHERE IDCabeceraOrdenPedido = :idInsert", [
+                "correlativo" => $numero_final,
+                "idInsert" => $insertedId
+            ]);
+        } else {
+            DB::UPDATE("UPDATE cabecera_factura SET cfac_correlativo = :correlativo WHERE IDCabeceraFactura = :idInsert", [
+                "correlativo" => $numero_final, 
+                "idInsert" => $insertedId
+            ]);
+
+            DB::UPDATE("UPDATE cabecera_orden_pedido SET IDStatus = 4 WHERE IDCabeceraOrdenPedido IN (" . $valorSeparadoComas . ")");
+        }
+    }
+
+    private function procesarDetalleOrdenPedido($detalles, $insertedId)
+    {
+        $detalleOrdenPedidoJson = [];
+
+        foreach ($detalles as $detalleOrdenPedidoValue) {
             $detalleOrdenPedido = new DetalleOrdenPedidoModel();
             $detalleOrdenPedido->IDCabeceraOrdenPedido = $insertedId;
             $detalleOrdenPedido->IDProducto = $detalleOrdenPedidoValue['id_producto'];
             $detalleOrdenPedido->dop_cantidad = $detalleOrdenPedidoValue['cantidad'];
-            $detalleOrdenPedido->dop_precio = $detalleOrdenPedidoValue['precio'];
-            $detalleOrdenPedido->dop_total = $detalleOrdenPedidoValue['total'];
+            $detalleOrdenPedido->dop_precio = number_format((float)$detalleOrdenPedidoValue['precio'], 2, '.', '');
+            $detalleOrdenPedido->dop_total = number_format((float)$detalleOrdenPedidoValue['total'], 2, '.', '');
             $detalleOrdenPedido->observacion = $detalleOrdenPedidoValue['observacion'];
             $detalleOrdenPedido->save();
+
+            $obtenerNombreProducto = DB::table('productos_limpieza')
+                ->select('nombre_productoLimpieza', 'cat.nombre_categoria')
+                ->join('categorias as cat', 'productos_limpieza.id_categoria', '=', 'cat.id_categoria')
+                ->where('id_productoLimpieza', $detalleOrdenPedidoValue['id_producto'])
+                ->get();
+
+            $observacionLimpia = trim($detalleOrdenPedidoValue['observacion']);
+
+            if ($observacionLimpia != '') {
+                $producto = $obtenerNombreProducto[0]->nombre_categoria . ' - ' . $obtenerNombreProducto[0]->nombre_productoLimpieza . "\n\t - " . $observacionLimpia;
+            } else {
+                $producto = $obtenerNombreProducto[0]->nombre_categoria . ' - ' . $obtenerNombreProducto[0]->nombre_productoLimpieza;
+            }
+
+            $detalleOrdenPedidoJson[] = [
+                'cantidad'      => $detalleOrdenPedidoValue['cantidad'],
+                'producto'      => $producto
+            ];
         }
 
-        return $this->response_json(200, "", $cabeceraOrdenPedido);
+        return $detalleOrdenPedidoJson;
     }
+
+    private function obtenerDetalleOrdenPedido($idCabeceraOrdenPedido)
+    {
+        $idCabeceraArray = explode(',', $idCabeceraOrdenPedido);
+
+        $detallesOrdenPedido = DB::table('detalle_orden_pedido')
+        ->join('productos_limpieza', 'detalle_orden_pedido.IDProducto', '=', 'productos_limpieza.id_productoLimpieza')
+        ->join('categorias as cat', 'productos_limpieza.id_categoria', '=', 'cat.id_categoria')
+        ->select(
+            'detalle_orden_pedido.dop_cantidad as cantidad',
+            'productos_limpieza.nombre_productoLimpieza as producto',
+            'cat.nombre_categoria as categoria',
+            'detalle_orden_pedido.dop_precio as precio',
+            'detalle_orden_pedido.dop_total as total',
+            'detalle_orden_pedido.observacion as observacion'
+        )
+        ->whereIn('detalle_orden_pedido.IDCabeceraOrdenPedido', $idCabeceraArray)
+        ->get();
+
+        $detalleOrdenPedidoJson = [];
+
+        foreach ($detallesOrdenPedido as $detalle) {
+            $observacionLimpia = trim($detalle->observacion);
+    
+            if ($observacionLimpia != '') {
+                $producto = $detalle->categoria . ' - ' . $detalle->producto . "\n\t - " . $observacionLimpia;
+            } else {
+                $producto = $detalle->categoria . ' - ' . $detalle->producto;
+            }
+    
+            $detalleOrdenPedidoJson[] = [
+                'cantidad' => $detalle->cantidad,
+                'producto' => $producto,
+                'pUnitario' =>number_format((float)$detalle->precio, 2, '.', ''),
+                'valor' => number_format((float)$detalle->total, 2, '.', '')
+            ];
+        }
+    
+        return $detalleOrdenPedidoJson;
+    }
+
+    private function prepararDatosImpresion($transaccion, $tipoDocumento, $datosTransaccion, $detalleOrdenPedidoJson, $mesa = null)
+    {
+        if ( $tipoDocumento == 'orden_pedido' ) {
+            $data = [
+                'mesa' => $mesa,
+                'transaccion' => (string) $transaccion,
+                'numeroCuenta' => '1',
+                'cajero' => 'Administrador',
+                'fecha' => Carbon::now()->format('d/m/Y h:ia')
+            ];
+
+            $xmlFile = resource_path('xmls/OrdenPedidoXML.xml');
+        } else {
+            $obtenerDatosCabeceraFactura = DB::table('cabecera_factura')
+            ->select('cfac_correlativo')
+            ->where('IDCabeceraFactura', $datosTransaccion->id)
+            ->first();
+
+            if ($datosTransaccion->IDCliente != '') {
+                $obtenerDatosCliente = DB::table('cliente')
+                ->where('IDCliente', $datosTransaccion->IDCliente)
+                ->first();
+
+                $cli_nombres = $obtenerDatosCliente->cli_nombres;
+                $cli_documento = $obtenerDatosCliente->cli_documento;
+                $cli_telefono = $obtenerDatosCliente->cli_telefono;
+                $cli_direccion = $obtenerDatosCliente->cli_direccion;
+                $cli_email = $obtenerDatosCliente->cli_email;
+            } else {
+                $cli_nombres = "CONSUMIDOR FINAL";
+                $cli_documento = "9999999999999";
+                $cli_telefono = "980806534";
+                $cli_direccion = "";
+                $cli_email = "consumidor.final@kfc.com.ec";
+            }
+
+            $data = [
+                "razonSocial"           => "LA TETE BURGUER",
+                "ruc"                   => "10624722197",
+                "direccion"             => "1ERA ETAPA URB.PACHACAMAC MZ.D1 LT.13",
+                "distrito"              => "LIMA - VILLA EL SALVADOR",
+                "fecha"                 => Carbon::now()->format('d/m/Y h:ia'),
+                "nroComprobante"        => (string) $obtenerDatosCabeceraFactura->cfac_correlativo,
+                "nroOrden"              => (string) $transaccion,
+                "nroBoleta"             => (string) $obtenerDatosCabeceraFactura->cfac_correlativo,
+                "ambiente"              => "PRUEBAS",
+                "emision"               => "EMISION NORMAL ",
+                "cliente"               => $cli_nombres,
+                "rucCliente"            => $cli_documento,
+                "telefono"              => $cli_telefono,
+                "email"                 => $cli_email,
+                "cajero"                => "Administrador",
+                "simboloMoneda"         => "S./",
+                "leyendaCondiciones"    => "Estimado cliente: Por favor verifique los datos de su boleta, unicamente se aceptaran cambios el mismo dia de emision.",
+                "valorTotal"            => (string) $datosTransaccion->cfac_monto_total,
+                "subtotal"              => (string) $datosTransaccion->cfac_monto_total,
+                "descuento"             => "0.00",
+                "formaPago"             => $this->obtenerFormaPagoTransaccion($datosTransaccion->id)
+            ];
+
+            $xmlFile = resource_path('xmls/BoletaElectronicaXML.xml');
+        }
+
+        $registros = [
+            'registrosDetalle' => $detalleOrdenPedidoJson
+        ];
+
+        $xmlContent = File::get($xmlFile);
+        $xmlContent = str_replace('\\', '', $xmlContent);
+
+        return [
+            'idImpresora' => 'CognitiveTPG Receipt',
+            'idMarca' => 'BEMATECH',
+            'aplicaBalanceo' => '0',
+            'idPlantilla' => $xmlContent,
+            'data' => $data,
+            'registros' => [$registros]
+        ];
+    }
+
+    private function obtenerFormaPagoTransaccion($transaccion)
+    {
+        $obtenerFormaPago = DB::table('forma_pago')
+        ->select('forma_pago.fp_descripcion')
+        ->join('cabecera_factura as cf', 'forma_pago.IDFormaPago', '=', 'cf.IDFormaPago')
+        ->where('IDCabeceraFactura', $transaccion)
+        ->first();
+
+        return $obtenerFormaPago->fp_descripcion;
+    }
+
+    private function enviarImpresion($payload)
+    {
+        $headers = [
+            "Content-Type: application/json",
+            "Accept: application/json"
+        ];
+
+        Log::info("URL_SERVICE_PRINTER_LOCAL: " . Config::get('app.URL_SERVICE_PRINTER_LOCAL'));
+        $ch = curl_init(Config::get('app.URL_SERVICE_PRINTER_LOCAL'));
+
+        $encodedPayload = json_encode($payload, JSON_UNESCAPED_UNICODE);
+        if ($encodedPayload === false) {
+            Log::error('Error en la codificación JSON: ' . json_last_error_msg());
+            return;
+        }
+    
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedPayload);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($ch, CURLOPT_FRESH_CONNECT, TRUE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+
+        $reintentos = 3;
+
+        for ($intento = 1; $intento <= $reintentos; $intento++) {
+            $response = curl_exec($ch);
+            $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $responseData = json_decode($response, true);
+
+            if ($statusCode === 200 && isset($responseData['error']) && $responseData['error'] === true) {
+                Log::error("Error en la impresión: " . $responseData['mensaje']);
+                break;
+            } elseif ($statusCode === 200 && isset($responseData['error']) && $responseData['error'] === false) {
+                Log::info("Se imprimió correctamente.");
+                break;
+            } elseif ($statusCode === 404) {
+                Log::info("Recurso no encontrado.");
+                break;
+            } else {
+                if ($intento == $reintentos) {
+                    $error = curl_error($ch);
+                    $result = [
+                        "error" => true,
+                        "mensaje" => "Ha ocurrido un error al momento de imprimir, por favor comuníquese con soporte.",
+                        "detalle" => $error
+                    ];
+                    Log::error("Error al imprimir en el intento $intento: $error");
+                } else {
+                    Log::warning("Intento $intento fallido, reintentando...");
+                }
+            }
+        }
+
+        curl_close($ch);
+    }
+    /* Funciones referente a la creación de orden de pedido y sus detalles - Final */
 
     public function getDatosCabeceraOrdenPedido(Request $request)
     {
@@ -253,49 +586,35 @@ class UnidadesMedidaController extends Controller
 
     public function cobrarPedidoMesaSeleccionada(Request $request)
     {
+        try {
+            $tipoDocumento = 'boleta_electronica';
+            $cabeceraFactura = $this->crearCabeceraFactura($request);
+            $this->actualizarCorrelativo($cabeceraFactura->id, $tipoDocumento, $cabeceraFactura->cfac_ordenes_pedido);
+            $detalleOrdenPedidoJson = $this->obtenerDetalleOrdenPedido($cabeceraFactura->cfac_ordenes_pedido);
 
-        $ordenesPedidoSuma = DB::select(
-            'SELECT SUM(odp_monto_total) as odp_monto_total_suma FROM cabecera_orden_pedido WHERE IDMesa = :IDMesa AND IDStatus = 3',
-            ["IDMesa" => $request->idMesaSeleccionadaActual]
-        );
+            Log::info("APPLY_PRINTER_LOCAL: " . Config::get('app.APPLY_PRINTER_LOCAL'));
+            if ( Config::get('app.APPLY_PRINTER_LOCAL', false) ) {
+                $payload = $this->prepararDatosImpresion($cabeceraFactura->cfac_ordenes_pedido, 'boleta_electronica', $cabeceraFactura, $detalleOrdenPedidoJson);
 
-        $ordenesPedidoIdentificador = DB::select(
-            'SELECT IDCabeceraOrdenPedido FROM cabecera_orden_pedido WHERE IDMesa = :IDMesa AND IDStatus = 3',
-            ["IDMesa" => $request->idMesaSeleccionadaActual]
-        );
+                try {
+                    $this->enviarImpresion($payload);
+                } catch (\Exception $printException) {
+                    Log::error("Error al intentar imprimir: " . $printException->getMessage());
+                }
 
-        $arregloIdentificador = [];
+                $mensajeRespuesta = 'Boleta electrónica y impresión realizada con éxito';
+            } else {
+                $payload = $cabeceraFactura;
+                $mensajeRespuesta = 'Boleta electrónica creada con éxito';
+            }
 
-        foreach ($ordenesPedidoIdentificador as $ordenesIdentificador) {
-            array_push($arregloIdentificador, $ordenesIdentificador->IDCabeceraOrdenPedido);
+            return $this->response_json(200, $mensajeRespuesta, $payload);
+        } catch (\Exception $e) {
+            Log::error("Error al crear la boleta electrónica: " . $e->getMessage());
+            return $this->response_json(500, "Ha ocurrido un error durante la creación de la boleta electrónica.", [
+                'error' => $e->getMessage()
+            ]);
         }
-
-        $calculoTarjetaPorcentaje34 = $ordenesPedidoSuma[0]->odp_monto_total_suma * 0.0344;
-        $calculoTarjetaPorcentaje18 = $calculoTarjetaPorcentaje34 * 0.18;
-        $calculoTotalPorcenaje = $calculoTarjetaPorcentaje34 + $calculoTarjetaPorcentaje18;
-
-        $valorSeparadoComas = implode(",", $arregloIdentificador);
-
-        $validaciónPorTarjeta = $request->valueFormaPago == 2 ? 
-        $ordenesPedidoSuma[0]->odp_monto_total_suma - $calculoTotalPorcenaje : 
-        $ordenesPedidoSuma[0]->odp_monto_total_suma;
-
-        $cabeceraFactura = new CabeceraFacturaModel();
-        $cabeceraFactura->cfac_ordenes_pedido = $valorSeparadoComas;
-        $cabeceraFactura->cfac_monto_total = $validaciónPorTarjeta;
-        $cabeceraFactura->IDFormaPago = $request->valueFormaPago;
-        $cabeceraFactura->IDStatus = 4;
-        $cabeceraFactura->IDPeriodo = $this->retornarPeriodoActivo();
-        $cabeceraFactura->save();
-
-        $insertedId = $cabeceraFactura->id;
-        $numero_final = str_pad($insertedId, 10, '0', STR_PAD_LEFT);
-        DB::UPDATE("UPDATE cabecera_factura SET cfac_correlativo = :correlativo WHERE 
-        IDCabeceraFactura = :idInsert", ["correlativo" => $numero_final, "idInsert" => $insertedId]);
-        DB::UPDATE("UPDATE cabecera_orden_pedido SET IDStatus = 4 WHERE 
-        IDCabeceraOrdenPedido IN (" . $valorSeparadoComas . ")");
-
-        return $this->response_json(200, "", $cabeceraFactura);
     }
 
     public function totalRegistrosCierreCaja()
@@ -504,7 +823,6 @@ class UnidadesMedidaController extends Controller
 
     public function createEXCEL(Request $request)
     {
-
         return Excel::download(new UnidadesMedidaExport, 'unidadesMedida.xlsx');
     }
 }

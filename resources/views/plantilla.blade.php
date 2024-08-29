@@ -62,7 +62,7 @@
     ==============================================================  -->
 
     <!-- FontAwesome  -->
-	<script src="https://kit.fontawesome.com/e632f1f723.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/2776b79eec.js" crossorigin="anonymous"></script>
 
 	<!-- jQuery library -->
     <script src="{{ url('/') }}/js/plugins/jquery-3.5.1.js"></script>

@@ -239,4 +239,6 @@ return [
         'FastExcel' => Rap2hpoutre\FastExcel\Facades\FastExcel::class,
     ],
 
+    'APPLY_PRINTER_LOCAL' => env('APPLY_PRINTER_LOCAL'),
+    'URL_SERVICE_PRINTER_LOCAL' => env('URL_SERVICE_PRINTER_LOCAL'),
 ];

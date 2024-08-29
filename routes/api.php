@@ -38,4 +38,6 @@ Route::group(['prefix' => 'auth','middleware' => ['cors']], function () {
     Route::get('iniciarSesion', 'UnidadesMedidaController@iniciarSesion');
     Route::get('verificarPeriodoActivo', 'UnidadesMedidaController@verificarPeriodoActivo');
     Route::get('abrirPeriodoVenta', 'UnidadesMedidaController@abrirPeriodoVenta');
+    Route::get('createCliente', 'UnidadesMedidaController@createCliente');
+    Route::get('obtenerCliente', 'UnidadesMedidaController@obtenerCliente');
 });

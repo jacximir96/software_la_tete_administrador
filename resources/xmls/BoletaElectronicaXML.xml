@@ -1,0 +1,108 @@
+<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<plantilla id=\"impresion-facturaQR\">
+	<parametro alineacion=\"centrado\" estilo=\"bold\">razonSocial</parametro>
+	<salto/>
+	<etiqueta alineacion=\"centrado\" estilo=\"bold\">RUC: </etiqueta>
+	<parametro alineacion=\"centrado\" estilo=\"bold\">ruc</parametro>
+	<salto/>
+	<parametro alineacion=\"centrado\" estilo=\"fontB\">direccion</parametro>
+    <salto/>    
+    <parametro alineacion=\"centrado\" estilo=\"fontB\">distrito</parametro>
+	<salto/>
+	<salto/>
+	<etiqueta alineacion=\"centrado\" tamano=\"44\" estilo=\"fontB\">BOLETA ELECTRONICA</etiqueta>
+	<salto/>
+	<salto/>
+	<!-- End Infotributaria-->
+	<!-- InfoFactura-->
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\">FECHA: </etiqueta>
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">fecha</parametro>
+	<salto/>
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\">N° COMPROBANTE: </etiqueta>
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">nroComprobante</parametro>
+	<salto/>
+	<salto/>
+	<etiqueta alineacion=\"centrado\" estilo=\"bold\">ORDEN #: </etiqueta>
+	<parametro alineacion=\"centrado\" estilo=\"bold\">nroOrden</parametro>
+	<salto/>
+	<salto/>
+	<etiqueta alineacion=\"centrado\" estilo=\"bold\">BOLETA : </etiqueta>
+	<parametro alineacion=\"centrado\" estilo=\"bold\">nroBoleta</parametro>
+	<salto/>
+	<salto/>
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\">AMBIENTE: </etiqueta>
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">ambiente</parametro>
+	<salto/>
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\">EMISIÓN: </etiqueta>
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">emision</parametro>
+	<salto/>
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\">CLIENTE: </etiqueta>
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">cliente</parametro>
+	<salto/>
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\">RUC/CI: </etiqueta>
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">rucCliente</parametro>
+	<etiquetaCentrada tamano=\"2\" estilo=\"fontB\"/>
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\">TEL: </etiqueta>
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">telefono</parametro>
+	<salto/>
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\">E-MAIL: </etiqueta>
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">email</parametro>
+	<salto/>
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\">CAJERO/A: </etiqueta>
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">cajero</parametro>
+	<salto/>
+	<separador>-</separador>
+	<salto/>
+	<!-- End InfoFactura-->
+	<!-- Details-->
+	<etiquetaCentrada tamano=\"5\" estilo=\"bold\">CNT</etiquetaCentrada>
+	<etiquetaCentrada tamano=\"1\" estilo=\"bold\"/>
+	<etiquetaIzquierda tamano=\"17\" estilo=\"bold\">DESCRIPCION</etiquetaIzquierda>
+	<etiquetaCentrada tamano=\"1\" estilo=\"bold\"/>
+	<etiquetaDerecha tamano=\"8\" estilo=\"bold\">P.UNI</etiquetaDerecha>
+	<etiquetaCentrada tamano=\"1\" estilo=\"bold\"/>
+	<etiquetaDerecha tamano=\"8\" estilo=\"bold\">VALOR</etiquetaDerecha>
+	<salto/>
+	<registrosDetalle estilo=\"default\">
+		<item alineacion=\"centrado\" tamano=\"5\">cantidad</item>
+		<espacio alineacion=\"izquierda\" tamano=\"1\"/>
+		<item alineacion=\"izquierda\" tamano=\"17\">producto</item>
+		<espacio alineacion=\"izquierda\" tamano=\"1\"/>
+		<item alineacion=\"derecha\" tamano=\"8\">pUnitario</item>
+		<espacio alineacion=\"izquierda\" tamano=\"1\"/>
+		<item alineacion=\"derecha\" tamano=\"8\">valor</item>
+	</registrosDetalle>
+	<salto/>
+	<!-- End Details-->
+	<!-- Desglose impuestos-->
+	<etiquetaDerecha tamano=\"27\" estilo=\"default\">Subtotal :</etiquetaDerecha>
+	<parametroDerecha tamano=\"4\" estilo=\"default\">simboloMoneda</parametroDerecha>
+	<parametroDerecha tamano=\"10\" estilo=\"default\">subtotal</parametroDerecha>
+	<salto/>
+	<etiquetaDerecha tamano=\"27\" estilo=\"default\">Descuento :</etiquetaDerecha>
+	<parametroDerecha tamano=\"4\" estilo=\"default\">simboloMoneda</parametroDerecha>
+	<parametroDerecha tamano=\"10\" estilo=\"default\">descuento</parametroDerecha>
+	<salto/>
+	<etiquetaDerecha tamano=\"27\" estilo=\"bold\">VALOR TOTAL :</etiquetaDerecha>
+	<parametroDerecha tamano=\"4\" estilo=\"bold\">simboloMoneda</parametroDerecha>
+	<parametroDerecha tamano=\"10\" estilo=\"bold\">valorTotal</parametroDerecha>
+	<salto/>
+	<!-- Fin Desglose impuestos-->
+	<separador>-</separador>
+	<salto/>
+	<!-- Forma Pago -->
+	<etiqueta alineacion=\"izquierda\" estilo=\"fontB\" tamano=\"54\">Forma de pago:</etiqueta>
+	<parametroDerecha tamano=\"30\" estilo=\"default\">formaPago</parametroDerecha>
+	<salto/>
+	<!-- End Forma Pago-->
+	<!-- Footer-->
+	<separador>-</separador>
+	<salto/>
+	<!-- Inicio Facturación Eletrónica -->
+	<parametro alineacion=\"izquierda\" estilo=\"fontB\">leyendaCondiciones</parametro>
+	<salto/>
+	<separador>-</separador>
+	<salto/>
+	<!-- Fin Facturación Eletrónica -->
+	<salto/>
+</plantilla>

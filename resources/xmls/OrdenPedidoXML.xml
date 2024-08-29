@@ -1,0 +1,44 @@
+<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<plantilla id=\"impresionOrdenPedidoLocal\">
+	<salto/>
+	<etiqueta estilo=\"bold|fontB\" tamano=\"2\" alineacion=\"centrado\">LA TETE BURGUER</etiqueta>
+	<salto/>
+	<etiqueta estilo=\"default\" alineacion=\"izquierda\">___ ___ ___ ___ ___ ___ ___ ___ ___ ___ ___</etiqueta>
+	<salto/>
+	<etiqueta estilo=\"default\" alineacion=\"izquierda\">| </etiqueta>
+	<parametro estilo=\"fontB\" alineacion=\"izquierda\">medio</parametro>
+	<etiqueta estilo=\"default\" alineacion=\"izquierda\">    | |       | |       | |       |</etiqueta>
+	<salto/>
+	<etiqueta estilo=\"default\">------------------------------------------</etiqueta>
+	<salto/>
+	<etiqueta estilo=\"bold\" alineacion=\"izquierda\">MESA: </etiqueta>
+    <parametro estilo=\"default\" alineacion=\"izquierda\">mesa</parametro>
+    <salto/>
+	<etiqueta estilo=\"bold\" alineacion=\"izquierda\">TRANSACCION #: </etiqueta>
+	<parametro estilo=\"default\" alineacion=\"izquierda\">transaccion</parametro>
+	<salto/>
+	<etiqueta estilo=\"bold\" alineacion=\"izquierda\">CAJERO/A: </etiqueta>
+	<parametro estilo=\"default\" alineacion=\"izquierda\">cajero</parametro>
+	<salto/>
+	<etiqueta estilo=\"bold\" alineacion=\"izquierda\">FECHA: </etiqueta>
+	<parametro estilo=\"default\" alineacion=\"izquierda\">fecha</parametro>
+	<salto/>
+	<salto/>
+	<etiqueta estilo=\"default\">------------------------------------------</etiqueta>
+    <salto/>
+	<etiquetaCentrada estilo=\"bold\" tamano=\"5\">CANT</etiquetaCentrada>
+	<etiquetaCentrada estilo=\"bold\" tamano=\"1\"\/>
+	<etiquetaIzquierda estilo=\"bold\" tamano=\"52\">DESCRIPCION</etiquetaIzquierda>
+	<salto/>
+	<etiqueta estilo=\"default\">------------------------------------------</etiqueta>
+	<salto/>
+	<registrosDetalle estilo=\"bold\">
+		<item alineacion=\"centrado\" tamano=\"5\">cantidad</item>
+		<espacio alineacion=\"izquierda\" tamano=\"1\"\/>
+		<item alineacion=\"izquierda\" tamano=\"52\">producto</item>
+	</registrosDetalle>
+	<salto/>
+	<etiqueta estilo=\"default\" alineacion=\"centrado\">------------------------------------------</etiqueta>
+	<salto/>
+	<salto/>
+</plantilla>
