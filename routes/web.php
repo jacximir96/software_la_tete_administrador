@@ -70,6 +70,10 @@ Route::group(['middleware' => ['permission:ver_productosLimpieza|editar_producto
     Route::get('/reportesProductosLimpieza/productosLimpiezaEXCEL','ProductosLimpiezaController@createEXCEL');
 });
 
+/* Insumos - inicio */
+Route::resource('/insumos','InsumosController');
+/* Insumos - final */
+
 Route::get('/soporteTecnico','SoporteTecnicoController@index');
 Route::get('/','DashboardController@index');
 Route::get('/dashboard','DashBoardController@index');

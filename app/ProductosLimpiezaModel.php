@@ -17,7 +17,8 @@ class ProductosLimpiezaModel extends Model
         "id_unidadMedida",
         "id_categoria",
         "imagen_productoLimpieza",
-        "id_usuario"
+        "id_usuario",
+        "nombres_insumos"
     ];
 
 }

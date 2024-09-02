@@ -20,22 +20,27 @@ class ProductosLimpiezaController extends Controller
 
         $administradores = AdministradoresModel::all();
         $categorias = CategoriasModel::all();
-        $productosLimpieza =    DB::select("SELECT PL.id_productoLimpieza,PL.codigo_productoLimpieza,PL.nombre_productoLimpieza,
-                                            PL.descripcion_productoLimpieza,PL.stock_productoLimpieza,PL.id_categoria,
-                                            PL.imagen_productoLimpieza,PL.id_usuario,PL.created_at,PL.updated_at,C.id_categoria,
-                                            C.nombre_categoria,UM.nombre_unidadMedida,PL.precio_unitario FROM productos_limpieza PL INNER JOIN categorias C ON
-                                            C.id_categoria = PL.id_categoria INNER JOIN unidades_medida UM ON PL.id_unidadMedida = UM.id_unidadMedida
-                                            ORDER BY id_productoLimpieza DESC");
+        $productosLimpieza =    DB::select("SELECT PL.id_productoLimpieza,PL.codigo_productoLimpieza,PL.nombre_productoLimpieza, 
+                PL.descripcion_productoLimpieza,PL.stock_productoLimpieza,PL.id_categoria, PL.imagen_productoLimpieza,
+                PL.id_usuario,GROUP_CONCAT(I.nombre_insumo SEPARATOR ', ') AS insumos_asociados, PL.created_at,PL.updated_at,C.id_categoria, 
+                C.nombre_categoria,UM.nombre_unidadMedida,PL.precio_unitario FROM productos_limpieza PL INNER JOIN categorias C 
+                ON C.id_categoria = PL.id_categoria INNER JOIN unidades_medida UM ON PL.id_unidadMedida = UM.id_unidadMedida LEFT JOIN insumo I 
+                ON FIND_IN_SET(I.IDInsumo, PL.insumos_asociados) GROUP BY PL.id_productoLimpieza ORDER BY  id_productoLimpieza DESC");
+        
+        $insumos =    DB::select("SELECT PL.IDInsumo,PL.codigo_insumo,PL.nombre_insumo,
+                PL.descripcion_insumo,PL.stock_insumo,
+                PL.id_usuario,PL.created_at,PL.updated_at,
+                UM.nombre_unidadMedida FROM insumo PL INNER JOIN unidades_medida UM 
+                ON PL.id_unidadMedida = UM.id_unidadMedida
+                ORDER BY IDInsumo DESC");
         $unidadesMedida = UnidadesMedidaModel::all();
         $codificacion_productoLimpieza = DB::SELECT('SELECT codigo_productoLimpieza + 1 as codificacion_productoLimpieza FROM productos_limpieza 
                                                      ORDER BY id_productoLimpieza DESC LIMIT 1');
 
-/*         echo '<pre>';print_r($codificacion_productoLimpieza);echo '</pre>';
-        return; */
-
         return view("paginas.productosLimpieza",  array("administradores"=>$administradores,"categorias"=>$categorias,
                                                         "productosLimpieza"=>$productosLimpieza,"unidadesMedida"=>$unidadesMedida,
-                                                        "codificacion_productoLimpieza"=>$codificacion_productoLimpieza));
+                                                        "codificacion_productoLimpieza"=>$codificacion_productoLimpieza,
+                                                        "insumos"=>$insumos));
     }
 
     public function store(Request $request){
@@ -47,9 +52,6 @@ class ProductosLimpiezaController extends Controller
                         "precio_productoLimpieza"=>$request->input("precio_productoLimpieza"),
                         "unidadMedida_productoLimpieza"=>$request->input("unidadMedida_productoLimpieza"),
                         "usuario_productoLimpieza"=>$request->input("usuario_productoLimpieza"));
-
-/*         echo '<pre>';print_r($datos);echo '</pre>';
-        return; */
 
         $imagenProductoLimpieza = array("imagen_productoLimpieza"=>$request->file("foto"));
 
@@ -84,10 +86,18 @@ class ProductosLimpiezaController extends Controller
                     }
 
                     $productoLimpieza = new ProductosLimpiezaModel();
+
+                    if ($request->has('insumos')) {
+                        $insumos = implode(',', $request->input('insumos'));
+                        $productoLimpieza->insumos_asociados = $insumos;
+                        $productoLimpieza->stock_productoLimpieza = 0;
+                    } else {
+                        $productoLimpieza->stock_productoLimpieza = $datos["stock_productoLimpieza"];
+                    }
+
                     $productoLimpieza->codigo_productoLimpieza = $datos["codigo_productoLimpieza"];
                     $productoLimpieza->nombre_productoLimpieza = $datos["nombre_productoLimpieza"];
                     $productoLimpieza->descripcion_productoLimpieza = $datos["descripcion_productoLimpieza"];
-                    $productoLimpieza->stock_productoLimpieza = $datos["stock_productoLimpieza"];
                     $productoLimpieza->precio_unitario = $datos["precio_productoLimpieza"];
                     $productoLimpieza->id_unidadMedida = $datos["unidadMedida_productoLimpieza"];
                     $productoLimpieza->id_categoria = $datos["categoria_productoLimpieza"];
@@ -120,12 +130,19 @@ class ProductosLimpiezaController extends Controller
         $productoLimpieza = ProductosLimpiezaModel::where("id_productoLimpieza",$id)->get();
         $administradores = AdministradoresModel::all();
         $categorias = CategoriasModel::all();
-        $productosLimpieza =    DB::select("SELECT PL.id_productoLimpieza,PL.codigo_productoLimpieza,PL.nombre_productoLimpieza,
-                                            PL.descripcion_productoLimpieza,PL.stock_productoLimpieza,PL.id_categoria,
-                                            PL.imagen_productoLimpieza,PL.id_usuario,PL.created_at,PL.updated_at,C.id_categoria,
-                                            C.nombre_categoria,UM.nombre_unidadMedida,PL.precio_unitario FROM productos_limpieza PL INNER JOIN categorias C ON
-                                            C.id_categoria = PL.id_categoria INNER JOIN unidades_medida UM ON PL.id_unidadMedida = UM.id_unidadMedida
-                                            ORDER BY id_productoLimpieza DESC");
+        $productosLimpieza =    DB::select("SELECT PL.id_productoLimpieza,PL.codigo_productoLimpieza,PL.nombre_productoLimpieza, 
+                PL.descripcion_productoLimpieza,PL.stock_productoLimpieza,PL.id_categoria, PL.imagen_productoLimpieza,
+                PL.id_usuario,GROUP_CONCAT(I.nombre_insumo SEPARATOR ', ') AS insumos_asociados, PL.created_at,PL.updated_at,C.id_categoria, 
+                C.nombre_categoria,UM.nombre_unidadMedida,PL.precio_unitario FROM productos_limpieza PL INNER JOIN categorias C 
+                ON C.id_categoria = PL.id_categoria INNER JOIN unidades_medida UM ON PL.id_unidadMedida = UM.id_unidadMedida LEFT JOIN insumo I 
+                ON FIND_IN_SET(I.IDInsumo, PL.insumos_asociados) GROUP BY PL.id_productoLimpieza ORDER BY  id_productoLimpieza DESC");
+        
+        $insumos =    DB::select("SELECT PL.IDInsumo,PL.codigo_insumo,PL.nombre_insumo,
+                PL.descripcion_insumo,PL.stock_insumo,
+                PL.id_usuario,PL.created_at,PL.updated_at,
+                UM.nombre_unidadMedida FROM insumo PL INNER JOIN unidades_medida UM 
+                ON PL.id_unidadMedida = UM.id_unidadMedida
+                ORDER BY IDInsumo DESC");
 
         $productoLimpieza_categoria =   DB::select('SELECT * FROM productos_limpieza PL INNER JOIN categorias C ON PL.id_categoria = C.id_categoria
                                                     WHERE PL.id_productoLimpieza = ?',[$id]);
@@ -141,12 +158,14 @@ class ProductosLimpiezaController extends Controller
             return view("paginas.productosLimpieza", array("status"=>200,"productoLimpieza"=>$productoLimpieza,"administradores"=>$administradores,
                                                     "productosLimpieza"=>$productosLimpieza,"categorias"=>$categorias,
                                                     "productoLimpieza_categoria"=>$productoLimpieza_categoria,"unidadesMedida"=>$unidadesMedida,
-                                                    "productoLimpieza_unidadMedida"=>$productoLimpieza_unidadMedida,"codificacion_productoLimpieza"=>$codificacion_productoLimpieza));
+                                                    "productoLimpieza_unidadMedida"=>$productoLimpieza_unidadMedida,"codificacion_productoLimpieza"=>$codificacion_productoLimpieza,
+                                                    "insumos"=>$insumos));
         }else{
             return view("paginas.productosLimpieza", array("status"=>404,"productoLimpieza"=>$productoLimpieza,"administradores"=>$administradores,
                                                     "productosLimpieza"=>$productosLimpieza,"categorias"=>$categorias,
                                                     "productoLimpieza_categoria"=>$productoLimpieza_categoria,"unidadesMedida"=>$unidadesMedida,
-                                                    "productoLimpieza_unidadMedida"=>$productoLimpieza_unidadMedida,"codificacion_productoLimpieza"=>$codificacion_productoLimpieza));
+                                                    "productoLimpieza_unidadMedida"=>$productoLimpieza_unidadMedida,"codificacion_productoLimpieza"=>$codificacion_productoLimpieza,
+                                                    "insumos"=>$insumos));
         }
     }
 
@@ -209,6 +228,20 @@ class ProductosLimpiezaController extends Controller
                                 "id_unidadMedida"=>$request->input("unidadMedida_productoLimpieza"),
                                 "id_usuario"=>$request->input("usuario_productoLimpieza"),
                                 "imagen_productoLimpieza"=>$ruta);
+
+                                if ($request->has('insumos') && !empty($request->input('insumos'))) {
+                                    $insumos = implode(',', $request->input('insumos'));
+                                    $datos['insumos_asociados'] = $insumos;
+                                
+                                    // Si hay insumos seleccionados, establece el stock a 0
+                                    $datos['stock_productoLimpieza'] = 0;
+                                } else {
+                                    // Si no hay insumos seleccionados, también establece el stock a 0
+                                    $datos['stock_productoLimpieza'] = 0;
+                                    $datos['insumos_asociados'] = NULL;
+                                }
+                                
+                /* dd($datos); */
 
                 $productoLimpieza = ProductosLimpiezaModel::where('id_productoLimpieza',$id)->update($datos);
                 return redirect("/productosLimpieza")->with("ok-editar","");

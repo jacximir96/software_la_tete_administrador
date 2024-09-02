@@ -8,6 +8,7 @@ use App\UnidadesMedidaModel;
 use App\CabeceraFacturaModel;
 use App\CabeceraOrdenPedidoModel;
 use App\DetalleOrdenPedidoModel;
+use App\ProductosLimpiezaModel;
 use App\CajaCuadreModel;
 use App\PeriodoModel;
 use App\ClienteModel;
@@ -92,28 +93,116 @@ class UnidadesMedidaController extends Controller
     public function createOrdenPedido(Request $request)
     {
         try {
-            $tipoDocumento = 'orden_pedido';
-            $cabeceraOrdenPedido = $this->crearCabeceraOrdenPedido($request);
-            $this->actualizarCorrelativo($cabeceraOrdenPedido->id, $tipoDocumento);
-            $detalleOrdenPedidoJson = $this->procesarDetalleOrdenPedido($request->detalleOrdenPedido, $cabeceraOrdenPedido->id);
+            /* Validar error de stock */
+            foreach ($request->detalleOrdenPedido as $detalleOrdenPedidoValue) {
+                $productoId = $detalleOrdenPedidoValue['id_producto'];
+            
+                // Verificar si el producto tiene insumos asociados
+                $producto = DB::table('productos_limpieza')
+                    ->where('id_productoLimpieza', $productoId)
+                    ->first();
+            
+                if (!$producto) {
+                    return response()->json(['error' => 'Producto no encontrado'], 404);
+                }
+            
+                // Verificar si el producto tiene insumos asociados
+                if (!empty($producto->insumos_asociados)) {
+                    $insumosIds = explode(',', $producto->insumos_asociados);
+            
+                    // Verificar el stock de cada insumo
+                    foreach ($insumosIds as $insumoId) {
+                        $insumo = DB::table('insumo')
+                            ->where('IDInsumo', $insumoId)
+                            ->first();
+            
+                    if (!$insumo) {
+                        return response()->json(['error' => 'Insumo no encontrado: ' . $insumoId], 404);
+                    }
+        
+                    if ($insumo->stock_insumo <= 0) {
+                        return response()->json(['error' => 'Stock insuficiente para el insumo: ' . $insumo->nombre_insumo], 400);
+                    }
+                    }
+                } else {
+                    // Verificar el stock del producto si no tiene insumos asociados
+                    if ($producto->stock_productoLimpieza <= 0) {
+                        return response()->json(['error' => 'Stock insuficiente para el producto: ' . $producto->nombre_productoLimpieza], 400);
+                    }
+                }
+            
+                // Si todo está bien, añade el producto a la lista de disponibles
+                $productoDisponibleStock[] = $productoId;
+            }
+            /* Validar error de stock */
 
-            Log::info("APPLY_PRINTER_LOCAL: " . Config::get('app.APPLY_PRINTER_LOCAL'));
-            if ( Config::get('app.APPLY_PRINTER_LOCAL', false) ) {
-                $payload = $this->prepararDatosImpresion($cabeceraOrdenPedido->id, $tipoDocumento, $cabeceraOrdenPedido, $detalleOrdenPedidoJson, $request->IDMesa);
+            try {
+                DB::beginTransaction();
 
-                try {
-                    $this->enviarImpresion($payload);
-                } catch (\Exception $printException) {
-                    Log::error("Error al intentar imprimir: " . $printException->getMessage());
+                $tipoDocumento = 'orden_pedido';
+                $cabeceraOrdenPedido = $this->crearCabeceraOrdenPedido($request);
+                $this->actualizarCorrelativo($cabeceraOrdenPedido->id, $tipoDocumento);
+                $detalleOrdenPedidoJson = $this->procesarDetalleOrdenPedido($request->detalleOrdenPedido, $cabeceraOrdenPedido->id);
+
+                /* AGREGAMOS VALIDACION PARA DESCONTAR STOCK - INICIO */
+                foreach ($request->detalleOrdenPedido as $detalleOrdenPedidoValue) {
+                    $productoId = $detalleOrdenPedidoValue['id_producto'];
+                    $cantidad = 1;
+            
+                    // Verificar si el producto tiene insumos asociados
+                    $producto = DB::table('productos_limpieza')
+                        ->where('id_productoLimpieza', $productoId)
+                        ->first();
+            
+                    if (!empty($producto->insumos_asociados)) {
+                        $insumosIds = explode(',', $producto->insumos_asociados);
+            
+                        foreach ($insumosIds as $insumoId) {
+                            // Descontar stock del insumo
+                            DB::table('insumo')
+                                ->where('IDInsumo', $insumoId)
+                                ->decrement('stock_insumo', $cantidad);
+                        }
+                    } else {
+                        // Descontar stock del producto si no tiene insumos asociados
+                        DB::table('productos_limpieza')
+                            ->where('id_productoLimpieza', $productoId)
+                            ->decrement('stock_productoLimpieza', $cantidad);
+                    }
                 }
 
-                $mensajeRespuesta = 'Orden de pedido y impresión realizada con éxito';
-            } else {
-                $payload = $cabeceraOrdenPedido;
-                $mensajeRespuesta = 'Orden de pedido creada con éxito';
-            }
+                DB::commit();
 
-            return $this->response_json(200, $mensajeRespuesta, $payload);
+                /* AGREGAMOS VALIDACION PARA DESCONTAR STOCK - FINAL */
+
+                Log::info("APPLY_PRINTER_LOCAL: " . Config::get('app.APPLY_PRINTER_LOCAL'));
+                if ( Config::get('app.APPLY_PRINTER_LOCAL', false) ) {
+                    $payload = $this->prepararDatosImpresion($cabeceraOrdenPedido->id, $tipoDocumento, $cabeceraOrdenPedido, $detalleOrdenPedidoJson, $request->IDMesa);
+
+                    try {
+                        $this->enviarImpresion($payload);
+                    } catch (\Exception $printException) {
+                        Log::error("Error al intentar imprimir: " . $printException->getMessage());
+                    }
+
+                    try {
+
+                    } catch (\Exception $printException) {
+                        Log::error("Error al intentar descontar el stock: " . $printException->getMessage());
+                    }
+
+                    $mensajeRespuesta = 'Orden de pedido y impresión realizada con éxito';
+                } else {
+                    $payload = $cabeceraOrdenPedido;
+                    $mensajeRespuesta = 'Orden de pedido creada con éxito';
+                }
+
+                return $this->response_json(200, $mensajeRespuesta, $payload);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error("Error al procesar la orden: " . $e->getMessage());
+                return response()->json(['error' => 'Error al procesar la orden'], 500);
+            }
     
         } catch (\Exception $e) {
             Log::error("Error al crear la orden de pedido: " . $e->getMessage());

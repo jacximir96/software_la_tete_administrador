@@ -253,6 +253,12 @@
                                                     </a>
                                                 </li>
                                                 @endcan
+                                                <li class="nav-item">
+                                                    <a href="{{ url("/insumos") }}" class="nav-link">
+                                                    <i class="far fa-circle nav-icon"></i>
+                                                    <p>Insumos</p>
+                                                    </a>
+                                                </li>
                                             </ul>
                                         </li>
 

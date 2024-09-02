@@ -226,9 +226,15 @@
                                     <select class="form-control select-2 select2" name="seleccionar_producto" id="seleccionar_producto1">
                                         <option value="">-- Seleccionar el Producto --</option>
                                         @foreach($productosLimpiezaEntradas as $key => $value_productosLimpieza)
-                                        <option value="{{$value_productosLimpieza->id_productoLimpieza}}" data-stock="{{$value_productosLimpieza->stock_productoLimpieza}}">Nombre: {{$value_productosLimpieza->nombre_productoLimpieza}}, Descripción: {{$value_productosLimpieza->descripcion_productoLimpieza}}, Código: {{$value_productosLimpieza->codigo_productoLimpieza}}</option>
+                                        <option value="{{$value_productosLimpieza->id_productoLimpieza}}" 
+                                                data-stock="{{$value_productosLimpieza->stock_productoLimpieza}}"
+                                                data-tipo="{{$value_productosLimpieza->tipo}}"
+                                            >Nombre: {{$value_productosLimpieza->nombre_productoLimpieza}}, 
+                                            Descripción: {{$value_productosLimpieza->descripcion_productoLimpieza}}, 
+                                            Código: {{$value_productosLimpieza->codigo_productoLimpieza}}</option>
                                         @endforeach
                                     </select>
+                                    <input type="hidden" class="form-control" name="verificar_tipo_producto_insumo" id="verificar_tipo_producto_insumo" value="" required>
                                 </div>
 							</div>
 					</div>
@@ -318,9 +324,15 @@
                                     <select class="form-control select-2 select2" name="seleccionar_producto" id="seleccionar_producto">
                                         <option value="">-- Seleccionar el Producto --</option>
                                         @foreach($productosLimpieza as $key => $value_productosLimpieza)
-                                        <option value="{{$value_productosLimpieza->id_productoLimpieza}}" data-stock="{{$value_productosLimpieza->stock_productoLimpieza}}">Nombre: {{$value_productosLimpieza->nombre_productoLimpieza}}, Descripción: {{$value_productosLimpieza->descripcion_productoLimpieza}}, Código: {{$value_productosLimpieza->codigo_productoLimpieza}}</option>
+                                        <option value="{{$value_productosLimpieza->id_productoLimpieza}}" 
+                                                data-stock="{{$value_productosLimpieza->stock_productoLimpieza}}"
+                                                data-tipo="{{$value_productosLimpieza->tipo}}"
+                                            >Nombre: {{$value_productosLimpieza->nombre_productoLimpieza}}, 
+                                            Descripción: {{$value_productosLimpieza->descripcion_productoLimpieza}}, 
+                                            Código: {{$value_productosLimpieza->codigo_productoLimpieza}}</option>
                                         @endforeach
                                     </select>
+                                    <input type="hidden" class="form-control" name="verificar_tipo_producto_insumo_salida" id="verificar_tipo_producto_insumo_salida" value="" required>
                                 </div>
 							</div>
 					</div>
@@ -382,7 +394,21 @@
     </div>
 </div>
 
+<script>
+$(document).ready(function() {
+    $('#seleccionar_producto1').on('change', function() {
+        var tipo = $(this).find('option:selected').data('tipo');
+        $('#verificar_tipo_producto_insumo').val(tipo);
+        console.log(tipo);
+    });
 
+    $('#seleccionar_producto').on('change', function() {
+        var tipo = $(this).find('option:selected').data('tipo');
+        $('#verificar_tipo_producto_insumo_salida').val(tipo);
+        console.log(tipo);
+    });
+});
+</script>
 
 @if (Session::has("entrada-producto"))
   <script>

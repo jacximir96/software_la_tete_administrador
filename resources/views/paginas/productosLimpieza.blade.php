@@ -82,6 +82,7 @@
                             <th>Stock</th>
                             <th>Precio</th>
                             <th>Unidad de Medida</th>
+                            <th>Insumos</th>
                             <th>Agregado</th>
                             <th>Actualizado</th>
                             <th>Historial</th>
@@ -121,6 +122,15 @@
                             </td>
                             <td style="text-align: center; text-transform: uppercase;">S/ {{$valor_productosLimpieza->precio_unitario}}</td>
                             <td style="text-align: center; text-transform: uppercase;">{{$valor_productosLimpieza->nombre_unidadMedida}}</td>
+                            <td style="text-align: center; text-transform: uppercase; width: auto; min-width: 200px;">
+                                <ul style="list-style-type: disc; padding-left: 20px; margin-top: 0; margin-bottom: 0;">
+                                    @foreach(explode(',', $valor_productosLimpieza->insumos_asociados) as $insumo)
+                                        @if(trim($insumo) !== '') <!-- Verifica que el insumo no esté vacío -->
+                                            <li style="font-weight: bold; margin-bottom: 5px;">{{ $insumo }}</li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            </td>
                             <td style="text-align: center; text-transform: uppercase;">{{ \Carbon\Carbon::parse($valor_productosLimpieza->created_at)->format('d-m-Y H:i:s')}}</td>
                             <td style="text-align: center; text-transform: uppercase;">{{ \Carbon\Carbon::parse($valor_productosLimpieza->created_at)->format('d-m-Y H:i:s')}}</td>
                             <td style="text-align: center;">
@@ -193,24 +203,6 @@
                     </div>
 
                     <div class="input-group mb-3">
-                        <label for="email" class="col-md-3 control-label">Categoría:</label>
-
-                        <div class="col-md-9">
-                            <select class="form-control select2" name="categoria_productoLimpieza" required>
-                                <option value="">
-                                        -- Seleccionar la categoría --
-                                </option>
-                                @foreach ($categorias as $key => $value)
-                                    <option value="{{old('id_categoria',$value->id_categoria)}}">
-                                        {{old('nombre_categoria',$value->nombre_categoria)}}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                    </div>{{-- fin id de categoria --}}
-
-                    <div class="input-group mb-3">
                         <label for="email" class="col-md-3 control-label">Código:</label>
 
                         <div class="col-md-9">
@@ -258,7 +250,23 @@
                             @endif
                         @endforeach
                         </div>
+                    </div>
 
+                    <div class="input-group mb-3">
+                        <label for="email" class="col-md-3 control-label">Categoría:</label>
+
+                        <div class="col-md-9">
+                            <select class="form-control select2" name="categoria_productoLimpieza" required>
+                                <option value="">
+                                        -- Seleccionar la categoría --
+                                </option>
+                                @foreach ($categorias as $key => $value)
+                                    <option value="{{old('id_categoria',$value->id_categoria)}}">
+                                        {{old('nombre_categoria',$value->nombre_categoria)}}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     <div class="input-group mb-3">
@@ -317,6 +325,18 @@
                                     {{old('nombre_unidadMedida',$value->nombre_unidadMedida)}}
                                 </option>
                             @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <label for="email" class="col-md-3 control-label">Insumos:</label>
+
+                        <div class="col-md-9">
+                            <select class="form-control select2" id="insumos" name="insumos[]" multiple="multiple">
+                                @foreach($insumos as $insumo)
+                                    <option value="{{ $insumo->IDInsumo }}">{{ $insumo->nombre_insumo }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -490,6 +510,21 @@
                             </select>
                         </div>
                     </div><!-- FIN UNIDADES DE MEDIDA DE PRODUCTO DE LIMPIEZA -->
+
+                    <div class="input-group mb-3">
+                        <label for="insumos" class="col-md-3 control-label">Insumos:</label>
+
+                        <div class="col-md-9">
+                            <select class="form-control select2" id="insumos" name="insumos[]" multiple="multiple">
+                                @foreach($insumos as $insumo)
+                                    <option value="{{ $insumo->IDInsumo }}" 
+                                        @if(in_array($insumo->IDInsumo, explode(',', $valor_productoLimpieza->insumos_asociados))) selected @endif>
+                                        {{ $insumo->nombre_insumo }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
 
                     <!-- INICIO IMAGEN DE PRODUCTO DE LIMPIEZA -->
                     <hr class="pb-2">
