@@ -122,13 +122,26 @@
                             </td>
                             <td style="text-align: center; text-transform: uppercase;">S/ {{$valor_productosLimpieza->precio_unitario}}</td>
                             <td style="text-align: center; text-transform: uppercase;">{{$valor_productosLimpieza->nombre_unidadMedida}}</td>
-                            <td style="text-align: center; text-transform: uppercase; width: auto; min-width: 200px;">
+<!--                             <td style="text-align: center; text-transform: uppercase; width: auto; min-width: 200px;">
                                 <ul style="list-style-type: disc; padding-left: 20px; margin-top: 0; margin-bottom: 0;">
                                     @foreach(explode(',', $valor_productosLimpieza->insumos_asociados) as $insumo)
-                                        @if(trim($insumo) !== '') <!-- Verifica que el insumo no esté vacío -->
+                                        @if(trim($insumo) !== '')
                                             <li style="font-weight: bold; margin-bottom: 5px;">{{ $insumo }}</li>
                                         @endif
                                     @endforeach
+                                </ul>
+                            </td> -->
+                            <td style="text-align: center; text-transform: uppercase; width: auto; min-width: 200px;">
+                                <ul style="list-style-type: disc; padding-left: 20px; margin-top: 0; margin-bottom: 0;">
+                                    @if(!empty($valor_productosLimpieza->insumos_descripcion))
+                                        @foreach(explode(', ', $valor_productosLimpieza->insumos_descripcion) as $insumo)
+                                            @if(trim($insumo) !== '') <!-- Verifica que el insumo no esté vacío -->
+                                                <li style="font-weight: bold; margin-bottom: 5px;">{{ $insumo }}</li>
+                                            @endif
+                                        @endforeach
+                                    @else
+                                        <li style="font-weight: bold; margin-bottom: 5px;">Sin insumos asociados</li>
+                                    @endif
                                 </ul>
                             </td>
                             <td style="text-align: center; text-transform: uppercase;">{{ \Carbon\Carbon::parse($valor_productosLimpieza->created_at)->format('d-m-Y H:i:s')}}</td>
@@ -329,7 +342,7 @@
                         </div>
                     </div>
 
-                    <div class="input-group mb-3">
+<!--                     <div class="input-group mb-3">
                         <label for="email" class="col-md-3 control-label">Insumos:</label>
 
                         <div class="col-md-9">
@@ -338,6 +351,23 @@
                                     <option value="{{ $insumo->IDInsumo }}">{{ $insumo->nombre_insumo }}</option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div> -->
+
+                    <div class="input-group mb-3">
+                        <label for="email" class="col-md-3 control-label">Insumos:</label>
+
+                        <div class="col-md-9">
+                            @foreach($insumos as $insumo)
+                                <div class="insumo-group mb-2">
+                                    <label class="mr-2">{{ $insumo->nombre_insumo }}</label>
+                                    <input type="checkbox" name="insumos[]" value="{{ $insumo->IDInsumo }}">
+                                    
+                                    <label for="cantidad_{{ $insumo->IDInsumo }}" class="ml-2">Cantidad:</label>
+                                    <input type="number" class="form-control d-inline-block" name="cantidades[{{ $insumo->IDInsumo }}]" 
+                                        id="cantidad_{{ $insumo->IDInsumo }}" value="1" style="width: 80px;" step="0.01" min="0">
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
@@ -511,7 +541,7 @@
                         </div>
                     </div><!-- FIN UNIDADES DE MEDIDA DE PRODUCTO DE LIMPIEZA -->
 
-                    <div class="input-group mb-3">
+<!--                     <div class="input-group mb-3">
                         <label for="insumos" class="col-md-3 control-label">Insumos:</label>
 
                         <div class="col-md-9">
@@ -523,6 +553,64 @@
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div> -->
+
+<!--                     <div class="input-group mb-3">
+                        <label for="insumos" class="col-md-3 control-label">Insumos:</label>
+
+                        <div class="col-md-9">
+                            @foreach($insumos as $insumo)
+                                <div class="insumo-group mb-2">
+                                    <label class="mr-2">{{ $insumo->nombre_insumo }}</label>
+                                    <input type="checkbox" name="insumos[]" value="{{ $insumo->IDInsumo }}" 
+                                        @if(in_array($insumo->IDInsumo, explode(',', $valor_productoLimpieza->insumos_asociados))) checked @endif>
+                                    
+                                    <label for="cantidad_{{ $insumo->IDInsumo }}" class="ml-2">Cantidad:</label>
+                                    <input type="number" class="form-control d-inline-block" name="cantidades[{{ $insumo->IDInsumo }}]" 
+                                        id="cantidad_{{ $insumo->IDInsumo }}" value="1" style="width: 80px;" 
+                                        @if(!in_array($insumo->IDInsumo, explode(',', $valor_productoLimpieza->insumos_asociados))) disabled @endif>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div> -->
+                    <div id="insumoContainer">
+                        <div class="input-group mb-3">
+                            <label for="insumos" class="col-md-3 control-label">Insumos:</label>
+
+                            <div class="col-md-9">
+                                @foreach($insumos as $insumo)
+                                    @php
+                                        // Obtener el valor actual del insumo y la cantidad desde $valor_productoLimpieza
+                                        $insumoSeleccionado = false;
+                                        $cantidad = 1; // Valor por defecto
+
+                                        // Verificar si el insumo está asociado y obtener la cantidad si está seleccionado
+                                        if (!empty($valor_productoLimpieza->insumos_asociados)) {
+                                            $insumoData = explode(',', $valor_productoLimpieza->insumos_asociados);
+                                            foreach ($insumoData as $data) {
+                                                list($idInsumo, $cant) = explode(':', $data);
+                                                if ($idInsumo == $insumo->IDInsumo) {
+                                                    $insumoSeleccionado = true;
+                                                    $cantidad = $cant;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    @endphp
+
+                                    <div class="insumo-group mb-2">
+                                        <label class="mr-2">{{ $insumo->nombre_insumo }}</label>
+                                        <input type="checkbox" name="insumos[]" value="{{ $insumo->IDInsumo }}" 
+                                            @if($insumoSeleccionado) checked @endif 
+                                            onchange="document.getElementById('cantidad_{{ $insumo->IDInsumo }}').disabled = !this.checked">
+
+                                        <label for="cantidad_{{ $insumo->IDInsumo }}" class="ml-2">Cantidad:</label>
+                                        <input type="number" class="form-control d-inline-block" name="cantidades[{{ $insumo->IDInsumo }}]" 
+                                            id="cantidad_{{ $insumo->IDInsumo }}" value="{{ $cantidad }}" style="width: 80px;" step="0.01" min="0">
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
 
@@ -579,6 +667,28 @@
 @endif
 
 @endif
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('insumoContainer');
+
+    container.addEventListener('change', function(event) {
+        if (event.target.matches('input[type="checkbox"][name="insumos[]"]')) {
+            const inputCantidad = document.getElementById('cantidad_' + event.target.value);
+
+            if (event.target.checked) {
+                inputCantidad.disabled = false; // Forzar habilitado
+                console.log('El atributo disabled fue eliminado:', inputCantidad);
+            } else {
+                inputCantidad.disabled = true; // Deshabilitar
+                inputCantidad.value = 1; // Restablecer a 1 cuando se deselecciona
+                console.log('El atributo disabled fue añadido nuevamente:', inputCantidad);
+            }
+        }
+    });
+});
+
+</script>
 
 @if (Session::has("ok-crear"))
   <script>
