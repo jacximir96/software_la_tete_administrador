@@ -21,8 +21,8 @@ class CategoriasController extends Controller
     }
 
     public function store(Request $request){
-        $datos =  array("nombre_categoria"=>$request->input("nombre_categoria"),
-                        "descripcion_categoria"=>$request->input("descripcion_categoria"),
+        $datos =  array("nombre_categoria"=>strtoupper($request->input("nombre_categoria")),
+                        "descripcion_categoria"=>strtoupper($request->input("descripcion_categoria")),
                         "usuario_categoria"=>$request->input("usuario_categoria"));
 
         if(!empty($datos)){
@@ -76,8 +76,8 @@ class CategoriasController extends Controller
     }
 
     public function update($id, Request $request){
-        $datos =  array("nombre_categoria"=>$request->input("nombre_categoria"),
-                        "descripcion_categoria"=>$request->input("descripcion_categoria"),
+        $datos =  array("nombre_categoria"=>strtoupper($request->input("nombre_categoria")),
+                        "descripcion_categoria"=>strtoupper($request->input("descripcion_categoria")),
                         "usuario_categoria"=>$request->input("usuario_categoria"));
 
         //validar los datos
@@ -92,8 +92,8 @@ class CategoriasController extends Controller
                 return redirect("/categorias")->with("no-validacion","");
             }else{
 
-                $datos =  array("nombre_categoria"=>$request->input("nombre_categoria"),
-                                "descripcion_categoria"=>$request->input("descripcion_categoria"),
+                $datos =  array("nombre_categoria"=>strtoupper($request->input("nombre_categoria")),
+                                "descripcion_categoria"=>strtoupper($request->input("descripcion_categoria")),
                                 "id_usuario"=>$request->input("usuario_categoria"));
 
                 $categoria = CategoriasModel::where('id_categoria',$id)->update($datos);

@@ -34,8 +34,8 @@ class InsumosController extends Controller
 
     public function store(Request $request){
         $datos =  array("codigo_insumo"=>$request->input("codigo_insumo"),
-                        "nombre_insumo"=>$request->input("nombre_insumo"),
-                        "descripcion_insumo"=>$request->input("descripcion_insumo"),
+                        "nombre_insumo"=>strtoupper($request->input("nombre_insumo")),
+                        "descripcion_insumo"=>strtoupper($request->input("descripcion_insumo")),
                         "stock_insumo"=>$request->input("stock_insumo"),
                         "unidadMedida_insumo"=>$request->input("unidadMedida_insumo"),
                         "usuario_insumo"=>$request->input("usuario_insumo"));
@@ -116,8 +116,8 @@ class InsumosController extends Controller
 
     public function update($id,Request $request){
         $datos =  array("codigo_insumo"=>$request->input("codigo_insumo"),
-                        "nombre_insumo"=>$request->input("nombre_insumo"),
-                        "descripcion_insumo"=>$request->input("descripcion_insumo"),
+                        "nombre_insumo"=>strtoupper($request->input("nombre_insumo")),
+                        "descripcion_insumo"=>strtoupper($request->input("descripcion_insumo")),
                         "stock_insumo"=>$request->input("stock_insumo"),
                         "unidadMedida_insumo"=>$request->input("unidadMedida_insumo"),
                         "usuario_insumo"=>$request->input("usuario_insumo"));
@@ -135,8 +135,8 @@ class InsumosController extends Controller
                 return redirect("/insumos")->with("no-validacion","");
             }else{
                 $datos =  array("codigo_insumo"=>$request->input("codigo_insumo"),
-                                "nombre_insumo"=>$request->input("nombre_insumo"),
-                                "descripcion_insumo"=>$request->input("descripcion_insumo"),
+                                "nombre_insumo"=>strtoupper($request->input("nombre_insumo")),
+                                "descripcion_insumo"=>strtoupper($request->input("descripcion_insumo")),
                                 "stock_insumo"=>$request->input("stock_insumo"),
                                 "id_unidadMedida"=>$request->input("unidadMedida_insumo"),
                                 "id_usuario"=>$request->input("usuario_insumo"));

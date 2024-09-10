@@ -87,8 +87,8 @@ class ProductosLimpiezaController extends Controller
     public function store(Request $request){
         $datos =  array("categoria_productoLimpieza"=>$request->input("categoria_productoLimpieza"),
                         "codigo_productoLimpieza"=>$request->input("codigo_productoLimpieza"),
-                        "nombre_productoLimpieza"=>$request->input("nombre_productoLimpieza"),
-                        "descripcion_productoLimpieza"=>$request->input("descripcion_productoLimpieza"),
+                        "nombre_productoLimpieza"=>strtoupper($request->input("nombre_productoLimpieza")),
+                        "descripcion_productoLimpieza"=>strtoupper($request->input("descripcion_productoLimpieza")),
                         "stock_productoLimpieza"=>$request->input("stock_productoLimpieza"),
                         "precio_productoLimpieza"=>$request->input("precio_productoLimpieza"),
                         "unidadMedida_productoLimpieza"=>$request->input("unidadMedida_productoLimpieza"),
@@ -263,8 +263,8 @@ class ProductosLimpiezaController extends Controller
     public function update($id,Request $request){
         $datos =  array("categoria_productoLimpieza"=>$request->input("categoria_productoLimpieza"),
                         "codigo_productoLimpieza"=>$request->input("codigo_productoLimpieza"),
-                        "nombre_productoLimpieza"=>$request->input("nombre_productoLimpieza"),
-                        "descripcion_productoLimpieza"=>$request->input("descripcion_productoLimpieza"),
+                        "nombre_productoLimpieza"=>strtoupper($request->input("nombre_productoLimpieza")),
+                        "descripcion_productoLimpieza"=>strtoupper($request->input("descripcion_productoLimpieza")),
                         "stock_productoLimpieza"=>$request->input("stock_productoLimpieza"),
                         "precio_productoLimpieza"=>$request->input("precio_productoLimpieza"),
                         "unidadMedida_productoLimpieza"=>$request->input("unidadMedida_productoLimpieza"),
@@ -312,8 +312,8 @@ class ProductosLimpiezaController extends Controller
 
                 $datos =  array("id_categoria"=>$request->input("categoria_productoLimpieza"),
                                 "codigo_productoLimpieza"=>$request->input("codigo_productoLimpieza"),
-                                "nombre_productoLimpieza"=>$request->input("nombre_productoLimpieza"),
-                                "descripcion_productoLimpieza"=>$request->input("descripcion_productoLimpieza"),
+                                "nombre_productoLimpieza"=>strtoupper($request->input("nombre_productoLimpieza")),
+                                "descripcion_productoLimpieza"=>strtoupper($request->input("descripcion_productoLimpieza")),
                                 "stock_productoLimpieza"=>$request->input("stock_productoLimpieza"),
                                 "precio_unitario"=>$request->input("precio_productoLimpieza"),
                                 "id_unidadMedida"=>$request->input("unidadMedida_productoLimpieza"),
