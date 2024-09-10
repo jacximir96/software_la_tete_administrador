@@ -75,8 +75,10 @@ class ProductosLimpiezaController extends Controller
                 ON PL.id_unidadMedida = UM.id_unidadMedida
                 ORDER BY IDInsumo DESC");
         $unidadesMedida = UnidadesMedidaModel::all();
-        $codificacion_productoLimpieza = DB::SELECT('SELECT codigo_productoLimpieza + 1 as codificacion_productoLimpieza FROM productos_limpieza 
-                                                     ORDER BY id_productoLimpieza DESC LIMIT 1');
+        /*$codificacion_productoLimpieza = DB::SELECT('SELECT codigo_productoLimpieza + 1 as codificacion_productoLimpieza FROM productos_limpieza 
+                                                     ORDER BY id_productoLimpieza DESC LIMIT 1');*/
+
+        $codificacion_productoLimpieza = DB::SELECT('SELECT IFNULL(MAX(codigo_productoLimpieza) + 1, 1) as codificacion_productoLimpieza FROM productos_limpieza');
 
         return view("paginas.productosLimpieza",  array("administradores"=>$administradores,"categorias"=>$categorias,
                                                         "productosLimpieza"=>$productosLimpieza,"unidadesMedida"=>$unidadesMedida,
@@ -242,8 +244,10 @@ class ProductosLimpiezaController extends Controller
                                                     WHERE PL.id_productoLimpieza = ?',[$id]);
 
         $unidadesMedida = UnidadesMedidaModel::all();
-        $codificacion_productoLimpieza = DB::SELECT('SELECT codigo_productoLimpieza + 1 as codificacion_productoLimpieza FROM productos_limpieza 
-                                                     ORDER BY id_productoLimpieza DESC LIMIT 1');
+        /*$codificacion_productoLimpieza = DB::SELECT('SELECT codigo_productoLimpieza + 1 as codificacion_productoLimpieza FROM productos_limpieza 
+                                                     ORDER BY id_productoLimpieza DESC LIMIT 1');*/
+
+        $codificacion_productoLimpieza = DB::SELECT('SELECT IFNULL(MAX(codigo_productoLimpieza) + 1, 1) as codificacion_productoLimpieza FROM productos_limpieza');
 
         if(count($productoLimpieza) != 0){
             return view("paginas.productosLimpieza", array("status"=>200,"productoLimpieza"=>$productoLimpieza,"administradores"=>$administradores,

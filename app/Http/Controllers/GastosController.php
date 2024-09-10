@@ -41,7 +41,7 @@ class GastosController extends Controller
     public function store(Request $request)
     {
         $datos =  array(
-            "descripcion_gasto" => $request->input("descripcion_gasto"),
+            "descripcion_gasto" => strtoupper($request->input("descripcion_gasto")),
             "cantidad_gasto" => $request->input("cantidad_gasto"),
             "precio_gasto" => $request->input("precio_gasto"),
             "preciot_gasto" => $request->input("preciot_gasto"),
@@ -133,7 +133,7 @@ class GastosController extends Controller
     public function update($id, Request $request)
     {
         $datos =  array(
-            "descripcion_gasto" => $request->input("descripcion_gasto"),
+            "descripcion_gasto" => strtoupper($request->input("descripcion_gasto")),
             "cantidad_gasto" => $request->input("cantidad_gasto"),
             "precio_gasto" => $request->input("precio_gasto"),
             "preciot_gasto" => $request->input("preciot_gasto"),
@@ -155,7 +155,7 @@ class GastosController extends Controller
                 return redirect("/gastos")->with("no-validacion", "");
             } else {
                 $datos =  array(
-                    "descripcion_gasto" => $request->input("descripcion_gasto"),
+                    "descripcion_gasto" => strtoupper($request->input("descripcion_gasto")),
                     "cantidad_gasto" => $request->input("cantidad_gasto"),
                     "precio_gasto" => $request->input("precio_gasto"),
                     "preciot_gasto" => $request->input("preciot_gasto"),

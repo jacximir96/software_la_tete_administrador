@@ -796,7 +796,7 @@ class UnidadesMedidaController extends Controller
     public function store(Request $request)
     {
         $datos =  array(
-            "nombre_unidadMedida" => $request->input("nombre_unidadMedida"),
+            "nombre_unidadMedida" => strtoupper($request->input("nombre_unidadMedida")),
             "estado_unidadMedida" => $request->input("estado_unidadMedida"),
             "usuario_unidadMedida" => $request->input("usuario_unidadMedida")
         );
@@ -864,7 +864,7 @@ class UnidadesMedidaController extends Controller
     public function update($id, Request $request)
     {
         $datos =  array(
-            "nombre_unidadMedida" => $request->input("nombre_unidadMedida"),
+            "nombre_unidadMedida" => strtoupper($request->input("nombre_unidadMedida")),
             "estado_unidadMedida" => $request->input("estado_unidadMedida"),
             "usuario_unidadMedida" => $request->input("usuario_unidadMedida")
         );
@@ -880,7 +880,7 @@ class UnidadesMedidaController extends Controller
                 return redirect("/unidadesMedida")->with("no-validacion", "");
             } else {
                 $datos =  array(
-                    "nombre_unidadMedida" => $request->input("nombre_unidadMedida"),
+                    "nombre_unidadMedida" => strtoupper($request->input("nombre_unidadMedida")),
                     "estado_unidadMedida" => $request->input("estado_unidadMedida"),
                     "id_usuario" => $request->input("usuario_unidadMedida")
                 );
